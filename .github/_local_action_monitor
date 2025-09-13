@@ -1,0 +1,424 @@
+#!/bin/bash
+
+# Local GitHub Actions Monitor
+# Monitors all workflow runs and collects detailed logs from failed runs
+# Waits until ALL workflows are complete before showing final results
+# Usage: ./_local_action_monitor [commit-hash] [max-wait-minutes]
+
+set -euo pipefail
+
+# Configuration
+REPO="zsenarchitect/rock-paper-scissors"
+CHECK_INTERVAL=30  # seconds
+MAX_WAIT_MINUTES=${2:-60}  # Default 60 minutes max wait
+COMMIT_HASH=${1:-"main"}  # Default to main branch
+LOG_DIR="DEBUG/logs/action-monitoring"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+LOG_FILE="${LOG_DIR}/action-monitor_${TIMESTAMP}.log"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Create log directory
+mkdir -p "$LOG_DIR"
+
+# Logging function
+log() {
+    local level=$1
+    shift
+    local message="$*"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    
+    case $level in
+        "INFO")  echo -e "${BLUE}[INFO]${NC} $message" | tee -a "$LOG_FILE" ;;
+        "WARN")  echo -e "${YELLOW}[WARN]${NC} $message" | tee -a "$LOG_FILE" ;;
+        "ERROR") echo -e "${RED}[ERROR]${NC} $message" | tee -a "$LOG_FILE" ;;
+        "SUCCESS") echo -e "${GREEN}[SUCCESS]${NC} $message" | tee -a "$LOG_FILE" ;;
+        "DEBUG") echo -e "${PURPLE}[DEBUG]${NC} $message" | tee -a "$LOG_FILE" ;;
+        *)       echo -e "$message" | tee -a "$LOG_FILE" ;;
+    esac
+}
+
+# Function to get workflow runs for a specific commit (last 10 minutes)
+get_workflow_runs() {
+    local commit=$1
+    # Get current UTC time and subtract 10 minutes
+    local current_utc=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+    local ten_minutes_ago
+    
+    # Try different date command approaches for different systems
+    if date -u -v-10M '+%Y-%m-%dT%H:%M:%SZ' >/dev/null 2>&1; then
+        # macOS BSD date
+        ten_minutes_ago=$(date -u -v-10M '+%Y-%m-%dT%H:%M:%SZ')
+    elif date -u -d '10 minutes ago' '+%Y-%m-%dT%H:%M:%SZ' >/dev/null 2>&1; then
+        # GNU date (Linux)
+        ten_minutes_ago=$(date -u -d '10 minutes ago' '+%Y-%m-%dT%H:%M:%SZ')
+    else
+        # Fallback: use current time (no filtering)
+        ten_minutes_ago="1970-01-01T00:00:00Z"
+        log "WARN" "Could not calculate 10 minutes ago, showing all recent runs"
+    fi
+    
+    echo "DEBUG: Current UTC: $current_utc" >&2
+    echo "DEBUG: 10 minutes ago UTC: $ten_minutes_ago" >&2
+    
+    gh run list --repo "$REPO" --limit 20 --json databaseId,status,conclusion,workflowName,createdAt,updatedAt,headBranch,event,displayTitle | jq -r ".[] | select((.headBranch == \"$commit\" or .headBranch == \"main\") and (.createdAt > \"$ten_minutes_ago\")) | \"\(.databaseId)|\(.status)|\(.conclusion)|\(.workflowName)|\(.createdAt)|\(.updatedAt)|\(.displayTitle)\""
+}
+
+# Function to check if all workflows are complete
+check_all_complete() {
+    local commit=$1
+    local runs
+    runs=$(get_workflow_runs "$commit")
+    
+    if [ -z "$runs" ]; then
+        log "INFO" "No recent workflow runs found for commit: $commit (last 10 minutes)"
+        log "INFO" "This means either no workflows have run recently or all recent workflows are completed"
+        return 0  # No recent workflows means nothing to wait for
+    fi
+    
+    local incomplete_count=0
+    local running_workflows=()
+    
+    while IFS= read -r line; do
+        if [ -n "$line" ]; then
+            local id=$(echo "$line" | cut -d'|' -f1)
+            local status=$(echo "$line" | cut -d'|' -f2)
+            local workflow_name=$(echo "$line" | cut -d'|' -f4)
+            
+            if [ "$status" != "completed" ]; then
+                ((incomplete_count++))
+                running_workflows+=("$workflow_name")
+            fi
+        fi
+    done <<< "$runs"
+    
+    if [ $incomplete_count -eq 0 ]; then
+        return 0  # All complete
+    else
+        log "DEBUG" "Still waiting for $incomplete_count workflow(s): ${running_workflows[*]}"
+        return 1  # Some still running
+    fi
+}
+
+# Function to get workflow status summary
+get_status_summary() {
+    local commit=$1
+    local runs
+    runs=$(get_workflow_runs "$commit")
+    
+    log "INFO" "📊 Current Workflow Status Summary (Last 10 minutes):"
+    log "INFO" "====================================================="
+    
+    if [ -z "$runs" ]; then
+        log "INFO" "ℹ️  No recent workflow runs found in the last 10 minutes"
+        log "INFO" "ℹ️  This could mean:"
+        log "INFO" "   - No workflows have been triggered recently"
+        log "INFO" "   - All recent workflows have completed"
+        log "INFO" "   - No workflows are currently running"
+        log "INFO" "====================================================="
+        return
+    fi
+    
+    local success_count=0
+    local failure_count=0
+    local running_count=0
+    local queued_count=0
+    
+    while IFS= read -r line; do
+        if [ -n "$line" ]; then
+            local id=$(echo "$line" | cut -d'|' -f1)
+            local status=$(echo "$line" | cut -d'|' -f2)
+            local conclusion=$(echo "$line" | cut -d'|' -f3)
+            local workflow_name=$(echo "$line" | cut -d'|' -f4)
+            local created_at=$(echo "$line" | cut -d'|' -f5)
+            local updated_at=$(echo "$line" | cut -d'|' -f6)
+            local title=$(echo "$line" | cut -d'|' -f7)
+            
+            case $status in
+                "completed")
+                    if [ "$conclusion" = "success" ]; then
+                        log "SUCCESS" "✅ $workflow_name: SUCCESS"
+                        ((success_count++))
+                    else
+                        log "ERROR" "❌ $workflow_name: FAILED ($conclusion)"
+                        ((failure_count++))
+                    fi
+                    ;;
+                "in_progress")
+                    log "WARN" "🔄 $workflow_name: RUNNING"
+                    ((running_count++))
+                    ;;
+                "queued")
+                    log "INFO" "⏳ $workflow_name: QUEUED"
+                    ((queued_count++))
+                    ;;
+                *)
+                    log "WARN" "❓ $workflow_name: $status"
+                    ;;
+            esac
+        fi
+    done <<< "$runs"
+    
+    log "INFO" "====================================================="
+    log "INFO" "📈 Summary: ✅ $success_count success, ❌ $failure_count failed, 🔄 $running_count running, ⏳ $queued_count queued"
+    log "INFO" "====================================================="
+}
+
+# Function to collect logs from failed runs
+collect_failed_logs() {
+    local commit=$1
+    local runs
+    runs=$(get_workflow_runs "$commit")
+    local failed_runs=()
+    
+    # Find failed runs
+    while IFS= read -r line; do
+        if [ -n "$line" ]; then
+            local id=$(echo "$line" | cut -d'|' -f1)
+            local status=$(echo "$line" | cut -d'|' -f2)
+            local conclusion=$(echo "$line" | cut -d'|' -f3)
+            local workflow_name=$(echo "$line" | cut -d'|' -f4)
+            
+            if [ "$status" = "completed" ] && [ "$conclusion" != "success" ]; then
+                failed_runs+=("$id|$workflow_name")
+            fi
+        fi
+    done <<< "$runs"
+    
+    if [ ${#failed_runs[@]} -eq 0 ]; then
+        log "SUCCESS" "🎉 No failed runs found!"
+        return 0
+    fi
+    
+    log "ERROR" "🚨 Found ${#failed_runs[@]} failed workflow(s). Collecting detailed logs..."
+    
+    # Create failed logs directory
+    local failed_logs_dir="${LOG_DIR}/failed_runs_${TIMESTAMP}"
+    mkdir -p "$failed_logs_dir"
+    
+    # Collect logs for each failed run
+    for run_info in "${failed_runs[@]}"; do
+        local run_id=$(echo "$run_info" | cut -d'|' -f1)
+        local workflow_name=$(echo "$run_info" | cut -d'|' -f2)
+        
+        log "ERROR" "📋 Collecting logs for failed run: $workflow_name (ID: $run_id)"
+        
+        # Get run details
+        local run_file="${failed_logs_dir}/${workflow_name}_${run_id}.log"
+        echo "=== FAILED WORKFLOW DETAILS ===" > "$run_file"
+        echo "Workflow: $workflow_name" >> "$run_file"
+        echo "Run ID: $run_id" >> "$run_file"
+        echo "Timestamp: $(date)" >> "$run_file"
+        echo "Repository: $REPO" >> "$run_file"
+        echo "Commit: $commit" >> "$run_file"
+        echo "=================================" >> "$run_file"
+        echo "" >> "$run_file"
+        
+        # Get run summary
+        echo "=== RUN SUMMARY ===" >> "$run_file"
+        gh run view "$run_id" --repo "$REPO" >> "$run_file" 2>&1 || true
+        echo "" >> "$run_file"
+        
+        # Get failed job logs
+        echo "=== FAILED JOB LOGS ===" >> "$run_file"
+        gh run view "$run_id" --log-failed --repo "$REPO" >> "$run_file" 2>&1 || true
+        echo "" >> "$run_file"
+        
+        # Get all job logs (if log-failed doesn't work)
+        echo "=== ALL JOB LOGS ===" >> "$run_file"
+        gh run view "$run_id" --log --repo "$REPO" >> "$run_file" 2>&1 || true
+        
+        log "ERROR" "📄 Logs saved to: $run_file"
+    done
+    
+    # Print summary of failed runs
+    log "ERROR" "📊 FAILED WORKFLOWS SUMMARY:"
+    log "ERROR" "============================"
+    for run_info in "${failed_runs[@]}"; do
+        local run_id=$(echo "$run_info" | cut -d'|' -f1)
+        local workflow_name=$(echo "$run_info" | cut -d'|' -f2)
+        log "ERROR" "❌ $workflow_name (ID: $run_id)"
+    done
+    log "ERROR" "============================"
+    log "ERROR" "📁 Detailed logs saved in: $failed_logs_dir"
+    
+    return 1  # Indicate failures found
+}
+
+# Function to wait for workflows to complete
+wait_for_completion() {
+    local commit=$1
+    local max_wait_seconds=$((MAX_WAIT_MINUTES * 60))
+    local elapsed=0
+    local check_count=0
+    
+    log "INFO" "🚀 Starting workflow monitoring for commit: $commit"
+    log "INFO" "⏱️  Max wait time: $MAX_WAIT_MINUTES minutes"
+    log "INFO" "🔄 Check interval: $CHECK_INTERVAL seconds"
+    log "INFO" "📝 Logs will be saved to: $LOG_FILE"
+    log "INFO" "🎯 Will wait until ALL workflows are complete (success or failure)"
+    log "INFO" "⏰ Filtering for workflows from last 10 minutes only"
+    
+    # First check - if no workflows, exit immediately
+    ((check_count++))
+    log "INFO" "🔍 Check #$check_count - Workflow status (Elapsed: ${elapsed}s / ${max_wait_seconds}s)"
+    
+    # Show current status
+    get_status_summary "$commit"
+    
+    # Check if there are any workflows to monitor
+    local runs
+    runs=$(get_workflow_runs "$commit")
+    
+    if [ -z "$runs" ]; then
+        log "SUCCESS" "✅ No recent workflows found - nothing to monitor!"
+        log "SUCCESS" "🎉 All recent workflows are already complete or no workflows have run recently"
+        return 0
+    fi
+    
+    # Count running/queued workflows
+    local running_count=0
+    local queued_count=0
+    
+    while IFS= read -r line; do
+        if [ -n "$line" ]; then
+            local status=$(echo "$line" | cut -d'|' -f2)
+            case $status in
+                "in_progress") ((running_count++)) ;;
+                "queued") ((queued_count++)) ;;
+            esac
+        fi
+    done <<< "$runs"
+    
+    if [ $running_count -eq 0 ] && [ $queued_count -eq 0 ]; then
+        log "SUCCESS" "✅ No workflows are running or queued - all recent workflows are complete!"
+        log "SUCCESS" "🎉 Nothing to wait for, proceeding to collect final results..."
+        return 0
+    fi
+    
+    log "INFO" "🔄 Found $running_count running and $queued_count queued workflows - monitoring..."
+    
+    while [ $elapsed -lt $max_wait_seconds ]; do
+        ((check_count++))
+        log "INFO" "🔍 Check #$check_count - Workflow status (Elapsed: ${elapsed}s / ${max_wait_seconds}s)"
+        
+        # Show current status
+        get_status_summary "$commit"
+        
+        # Check if all workflows are complete
+        if check_all_complete "$commit"; then
+            log "SUCCESS" "🎉 ALL workflows have completed! Proceeding to collect final results..."
+            return 0
+        fi
+        
+        # Calculate remaining time
+        local remaining=$((max_wait_seconds - elapsed))
+        local remaining_min=$((remaining / 60))
+        local remaining_sec=$((remaining % 60))
+        
+        log "INFO" "⏳ Still waiting for workflows to complete... (${remaining_min}m ${remaining_sec}s remaining)"
+        log "INFO" "🔄 Next check in $CHECK_INTERVAL seconds..."
+        
+        sleep $CHECK_INTERVAL
+        elapsed=$((elapsed + CHECK_INTERVAL))
+    done
+    
+    if [ $elapsed -ge $max_wait_seconds ]; then
+        log "WARN" "⏰ Timeout reached after $MAX_WAIT_MINUTES minutes!"
+        log "WARN" "Some workflows may still be running. Proceeding to collect current results..."
+        return 1
+    fi
+}
+
+# Function to show final results
+show_final_results() {
+    local commit=$1
+    
+    log "INFO" ""
+    log "INFO" "🏁 FINAL WORKFLOW RESULTS - ALL WORKFLOWS COMPLETED"
+    log "INFO" "=================================================="
+    log "INFO" "Commit: $commit"
+    log "INFO" "Completed at: $(date)"
+    log "INFO" "=================================================="
+    
+    # Show final status summary
+    get_status_summary "$commit"
+    
+    # Collect and show failed logs
+    log "INFO" ""
+    log "INFO" "📋 COLLECTING DETAILED RESULTS..."
+    log "INFO" "=================================="
+    
+    if ! collect_failed_logs "$commit"; then
+        log "ERROR" ""
+        log "ERROR" "💥 FINAL RESULT: SOME WORKFLOWS FAILED!"
+        log "ERROR" "========================================"
+        log "ERROR" "❌ Check the detailed logs above for specific failure reasons"
+        log "ERROR" "📁 All failure logs have been saved to DEBUG/logs/action-monitoring/"
+        log "ERROR" "🔧 Fix the issues and run the monitor again"
+        log "ERROR" "========================================"
+        return 1
+    else
+        log "SUCCESS" ""
+        log "SUCCESS" "🎉 FINAL RESULT: ALL WORKFLOWS PASSED!"
+        log "SUCCESS" "======================================"
+        log "SUCCESS" "✅ All workflows completed successfully"
+        log "SUCCESS" "🚀 Ready for deployment or next steps"
+        log "SUCCESS" "======================================"
+        return 0
+    fi
+}
+
+# Main execution
+main() {
+    log "INFO" "🚀 Local GitHub Actions Monitor Started"
+    log "INFO" "======================================"
+    log "INFO" "Repository: $REPO"
+    log "INFO" "Commit/Branch: $COMMIT_HASH"
+    log "INFO" "Max Wait: $MAX_WAIT_MINUTES minutes"
+    log "INFO" "Log File: $LOG_FILE"
+    log "INFO" "======================================"
+    
+    # Check if gh CLI is available
+    if ! command -v gh &> /dev/null; then
+        log "ERROR" "❌ GitHub CLI (gh) is not installed or not in PATH"
+        log "ERROR" "Please install it from: https://cli.github.com/"
+        exit 1
+    fi
+    
+    # Check if jq is available
+    if ! command -v jq &> /dev/null; then
+        log "ERROR" "❌ jq is not installed or not in PATH"
+        log "ERROR" "Please install it: brew install jq (macOS) or apt-get install jq (Ubuntu)"
+        exit 1
+    fi
+    
+    # Check if user is authenticated
+    if ! gh auth status &> /dev/null; then
+        log "ERROR" "❌ Not authenticated with GitHub CLI"
+        log "ERROR" "Please run: gh auth login"
+        exit 1
+    fi
+    
+    # Wait for workflows to complete
+    wait_for_completion "$COMMIT_HASH"
+    
+    # Show final results
+    if show_final_results "$COMMIT_HASH"; then
+        log "SUCCESS" "🎉 All workflows passed! Monitor completed successfully."
+        exit 0
+    else
+        log "ERROR" "💥 Some workflows failed! Check the logs for details."
+        exit 1
+    fi
+}
+
+# Run main function
+main "$@"

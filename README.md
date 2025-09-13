@@ -186,6 +186,39 @@ Transform the classic Rock Paper Scissors game into a **battle royale simulation
 - Learn about data insights and analytics
 - Discuss partnership opportunities
 
+## 🎯 Cursor Workflow
+
+This project includes an automated workflow for issue management:
+
+### Quick Commands
+```bash
+# Work on an issue (creates PR, leaves open for review)
+cursor-workflow 1
+
+# Work on an issue and merge immediately
+cursor-workflow 5 merge
+
+# Work on an issue with merge (alternative syntax)
+cursor-workflow 12 with merge
+```
+
+### What the Workflow Does
+1. **Analyzes the issue** - Reads description, labels, priority
+2. **Creates a dedicated branch** - Based on issue type and number
+3. **Implements the solution** - Step by step with TODO tracking
+4. **Tests thoroughly** - Linting, functionality, browser testing
+5. **Commits changes** - With descriptive commit messages
+6. **Creates PR** - With detailed description and issue reference
+7. **Optionally merges** - If merge is requested
+
+### Available Issues
+```bash
+# List all open issues
+cursor-workflow
+```
+
+For detailed workflow documentation, see [docs/WORKFLOW.md](docs/WORKFLOW.md).
+
 ## 📞 Contact & Support
 
 - **GitHub Issues**: [Report bugs and request features](https://github.com/zsenarchitect/rock-paper-scissors/issues)
