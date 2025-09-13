@@ -1,12 +1,12 @@
-name: 🧹 Automated Cleanup & Maintenance
+name: 🔍 Cleanup Check & Analysis
 
 on:
   schedule:
     - cron: '0 1 * * 0'  # Weekly on Sunday at 1 AM
   workflow_dispatch:
     inputs:
-      cleanup-type:
-        description: 'Type of cleanup to perform'
+      check-type:
+        description: 'Type of cleanup check to perform'
         required: true
         default: 'all'
         type: choice
@@ -23,278 +23,272 @@ env:
   NODE_VERSION: '18'
 
 jobs:
-  # Clean up debug and temporary files
-  cleanup-files:
-    name: 🗑️ Clean Up Files
+  # Check for files that need cleanup
+  check-files:
+    name: 🔍 Check Files Status
     runs-on: ubuntu-latest
-    if: github.event.inputs.cleanup-type == 'all' || github.event.inputs.cleanup-type == 'debug-files'
-    
-    # Only run if there are actually files to clean up
-    # This prevents unnecessary CI runs
+    if: github.event.inputs.check-type == 'all' || github.event.inputs.check-type == 'debug-files'
     
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
       
-    - name: 🔍 Check if cleanup is needed
-      id: check-cleanup
+    - name: 🔍 Analyze files that need cleanup
+      id: analyze-files
       run: |
-        echo "🔍 Checking if cleanup is needed..." >> $GITHUB_STEP_SUMMARY
-        # Check for files that need cleanup
-        if [ -n "$(find . -maxdepth 1 -name 'debug_*' -o -name '*.debug' -o -name '*.log' -o -name '*.tmp' -o -name '*.temp' -o -name 'test_*' -o -name '*_test')" ]; then
+        echo "🔍 Analyzing files that may need cleanup..." >> $GITHUB_STEP_SUMMARY
+        
+        # Check for various file types that might need cleanup
+        debug_files=$(find . -maxdepth 1 -name 'debug_*' -o -name '*.debug' 2>/dev/null | wc -l)
+        log_files=$(find . -name '*.log' 2>/dev/null | wc -l)
+        temp_files=$(find . -name '*.tmp' -o -name '*.temp' 2>/dev/null | wc -l)
+        test_files=$(find . -name 'test_*' -o -name '*_test' 2>/dev/null | wc -l)
+        
+        echo "debug_files=$debug_files" >> $GITHUB_OUTPUT
+        echo "log_files=$log_files" >> $GITHUB_OUTPUT
+        echo "temp_files=$temp_files" >> $GITHUB_OUTPUT
+        echo "test_files=$test_files" >> $GITHUB_OUTPUT
+        
+        total_files=$((debug_files + log_files + temp_files + test_files))
+        echo "total_files=$total_files" >> $GITHUB_OUTPUT
+        
+        if [ $total_files -gt 0 ]; then
           echo "cleanup-needed=true" >> $GITHUB_OUTPUT
-          echo "✅ Cleanup needed - files found" >> $GITHUB_STEP_SUMMARY
+          echo "❌ Repository is NOT clean - $total_files files found:" >> $GITHUB_STEP_SUMMARY
+          echo "- Debug files: $debug_files" >> $GITHUB_STEP_SUMMARY
+          echo "- Log files: $log_files" >> $GITHUB_STEP_SUMMARY
+          echo "- Temp files: $temp_files" >> $GITHUB_STEP_SUMMARY
+          echo "- Test files: $test_files" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚨 WORKFLOW FAILED: Repository needs cleanup!" >> $GITHUB_STEP_SUMMARY
         else
           echo "cleanup-needed=false" >> $GITHUB_OUTPUT
-          echo "ℹ️ No cleanup needed - repository is clean" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Repository is clean - no cleanup needed" >> $GITHUB_STEP_SUMMARY
         fi
         
-    - name: 🧹 Run cleanup script
-      if: steps.check-cleanup.outputs.cleanup-needed == 'true'
+    - name: 📋 Generate file analysis report
       run: |
-        echo "🧹 Starting cleanup process..." >> $GITHUB_STEP_SUMMARY
-        chmod +x cleanup-simple.sh
+        echo "📋 Generating file analysis report..." >> $GITHUB_STEP_SUMMARY
         
-        # Create cleanup log
-        echo "Starting automated cleanup..." > cleanup-execution.log
-        echo "Timestamp: $(date)" >> cleanup-execution.log
-        echo "Cleanup type: ${{ github.event.inputs.cleanup-type || 'all' }}" >> cleanup-execution.log
-        echo "Repository: $GITHUB_REPOSITORY" >> cleanup-execution.log
-        echo "Branch: $GITHUB_REF_NAME" >> cleanup-execution.log
-        echo "" >> cleanup-execution.log
-        
-        # Run cleanup with detailed logging
-        ./cleanup-simple.sh 2>&1 | tee -a cleanup-execution.log || true
-        
-        echo "✅ Cleanup script completed" >> $GITHUB_STEP_SUMMARY
-        
-    - name: 📊 Report cleanup results
-      run: |
-        echo "📊 Generating cleanup report..." >> $GITHUB_STEP_SUMMARY
-        
-        # Create cleanup report
-        cat > cleanup-report.md << 'EOF'
-        # 🧹 Cleanup Report
+        # Create detailed file analysis
+        cat > file-analysis-report.md << 'EOF'
+        # 🔍 File Analysis Report
         
         **Generated:** $(date)  
         **Workflow:** $GITHUB_WORKFLOW  
         **Run ID:** $GITHUB_RUN_ID  
-        **Cleanup Type:** ${{ github.event.inputs.cleanup-type || 'all' }}  
+        **Check Type:** ${{ github.event.inputs.check-type || 'all' }}  
         
-        ## 📋 Cleanup Summary
+        ## 📊 File Analysis Summary
         
-        ### Files Cleaned
-        - Debug files cleaned
-        - Test files organized  
-        - Temporary files removed
-        - Root directory organized
+        - **Debug files found:** ${{ steps.analyze-files.outputs.debug_files }}
+        - **Log files found:** ${{ steps.analyze-files.outputs.log_files }}
+        - **Temp files found:** ${{ steps.analyze-files.outputs.temp_files }}
+        - **Test files found:** ${{ steps.analyze-files.outputs.test_files }}
+        - **Total files needing review:** ${{ steps.analyze-files.outputs.total_files }}
         
-        ### Directory Structure
+        ## 🔍 Detailed File Listing
+        
+        ### Debug Files
         ```
-        $(find . -type d -name "DEBUG" -o -name "temp" -o -name "logs" | head -20)
-        ```
-        
-        ### File Counts
-        - **Total files:** $(find . -type f | wc -l)
-        - **Debug files:** $(find . -name "debug_*" -o -name "*.debug" | wc -l)
-        - **Test files:** $(find . -name "test_*" -o -name "*_test" | wc -l)
-        - **Log files:** $(find . -name "*.log" | wc -l)
-        
-        ### Disk Usage
-        ```
-        $(du -sh . 2>/dev/null || echo "Unknown")
+        $(find . -name 'debug_*' -o -name '*.debug' 2>/dev/null | head -20)
         ```
         
-        ## 🔍 Detailed Logs
+        ### Log Files
+        ```
+        $(find . -name '*.log' 2>/dev/null | head -20)
+        ```
         
+        ### Temp Files
         ```
-        $(head -50 cleanup-execution.log)
+        $(find . -name '*.tmp' -o -name '*.temp' 2>/dev/null | head -20)
         ```
+        
+        ### Test Files
+        ```
+        $(find . -name 'test_*' -o -name '*_test' 2>/dev/null | head -20)
+        ```
+        
+        ## 💡 Recommendations
+        
+        - Review debug files and remove if no longer needed
+        - Archive or remove old log files
+        - Clean up temporary files
+        - Organize test files in appropriate directories
         
         ---
         
-        *Generated by Automated Cleanup Workflow*
+        *Generated by Cleanup Check Workflow*
         EOF
         
-        echo "✅ Cleanup report generated" >> $GITHUB_STEP_SUMMARY
+        echo "✅ File analysis report generated" >> $GITHUB_STEP_SUMMARY
         
-    - name: 📊 Upload cleanup reports
+    - name: 🚨 Fail if cleanup needed
+      if: steps.analyze-files.outputs.cleanup-needed == 'true'
+      run: |
+        echo "🚨 Repository is not clean - failing workflow!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🗑️ Files that need cleanup:" >> $GITHUB_STEP_SUMMARY
+        
+        # Debug files
+        debug_files=$(find . -name 'debug_*' -o -name '*.debug' 2>/dev/null)
+        if [ -n "$debug_files" ]; then
+          echo "### Debug Files:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$debug_files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Log files
+        log_files=$(find . -name '*.log' 2>/dev/null)
+        if [ -n "$log_files" ]; then
+          echo "### Log Files:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$log_files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Temp files
+        temp_files=$(find . -name '*.tmp' -o -name '*.temp' 2>/dev/null)
+        if [ -n "$temp_files" ]; then
+          echo "### Temporary Files:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$temp_files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Test files in root
+        test_files=$(find . -maxdepth 1 -name 'test_*' -o -name '*_test' 2>/dev/null)
+        if [ -n "$test_files" ]; then
+          echo "### Test Files in Root Directory:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$test_files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 💡 Action Required:" >> $GITHUB_STEP_SUMMARY
+        echo "Please clean up these files before the workflow can pass." >> $GITHUB_STEP_SUMMARY
+        
+        # Also print to console for immediate visibility
+        echo "🚨 Repository is not clean - failing workflow!"
+        echo "Debug files: ${{ steps.analyze-files.outputs.debug_files }}"
+        echo "Log files: ${{ steps.analyze-files.outputs.log_files }}"
+        echo "Temp files: ${{ steps.analyze-files.outputs.temp_files }}"
+        echo "Test files: ${{ steps.analyze-files.outputs.test_files }}"
+        echo "Total files needing cleanup: ${{ steps.analyze-files.outputs.total_files }}"
+        exit 1
+        
+    - name: 📊 Upload file analysis report
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: cleanup-reports
-        path: |
-          cleanup-execution.log
-          cleanup-report.md
+        name: file-analysis-report
+        path: file-analysis-report.md
         retention-days: 30
 
-  # Clean up test artifacts and old builds
-  cleanup-artifacts:
-    name: 🧪 Clean Up Test Artifacts
+  # Check test artifacts and old builds
+  check-artifacts:
+    name: 🧪 Check Test Artifacts
     runs-on: ubuntu-latest
-    if: github.event.inputs.cleanup-type == 'all' || github.event.inputs.cleanup-type == 'test-artifacts'
+    if: github.event.inputs.check-type == 'all' || github.event.inputs.check-type == 'test-artifacts'
     
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
       
-    - name: 🧪 Clean up test artifacts
+    - name: 🧪 Analyze test artifacts
+      id: analyze-artifacts
       run: |
-        # Remove old test files
-        find . -name "*.pyc" -delete
-        find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
-        find . -name ".pytest_cache" -type d -exec rm -rf {} + 2>/dev/null || true
-        find . -name "coverage.xml" -delete
-        find . -name ".coverage" -delete
+        echo "🧪 Analyzing test artifacts..." >> $GITHUB_STEP_SUMMARY
         
-        # Clean up temp directory
+        # Check for Python cache files
+        pyc_files=$(find . -name "*.pyc" 2>/dev/null | wc -l)
+        pycache_dirs=$(find . -name "__pycache__" -type d 2>/dev/null | wc -l)
+        pytest_cache=$(find . -name ".pytest_cache" -type d 2>/dev/null | wc -l)
+        coverage_files=$(find . -name "coverage.xml" -o -name ".coverage" 2>/dev/null | wc -l)
+        
+        # Check for old temp files
+        old_temp_files=0
         if [ -d "temp" ]; then
-          find temp -type f -mtime +7 -delete 2>/dev/null || true
-          echo "Cleaned up old temp files"
+          old_temp_files=$(find temp -type f -mtime +7 2>/dev/null | wc -l)
         fi
         
-        # Clean up DEBUG directory
+        # Check for old debug files
+        old_debug_files=0
         if [ -d "DEBUG" ]; then
-          find DEBUG -type f -mtime +30 -delete 2>/dev/null || true
-          echo "Cleaned up old debug files"
+          old_debug_files=$(find DEBUG -type f -mtime +30 2>/dev/null | wc -l)
         fi
         
-    - name: 📊 Report artifact cleanup
-      run: |
-        echo "🧪 Test artifacts cleaned:"
-        echo "- Python cache files removed"
-        echo "- Old test files deleted"
-        echo "- Coverage files cleaned"
-        echo "- Temp files older than 7 days removed"
-        echo "- Debug files older than 30 days removed"
-
-  # Clean up old branches
-  cleanup-branches:
-    name: 🌿 Clean Up Old Branches
-    runs-on: ubuntu-latest
-    if: github.event.inputs.cleanup-type == 'all' || github.event.inputs.cleanup-type == 'old-branches'
-    
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+        echo "pyc_files=$pyc_files" >> $GITHUB_OUTPUT
+        echo "pycache_dirs=$pycache_dirs" >> $GITHUB_OUTPUT
+        echo "pytest_cache=$pytest_cache" >> $GITHUB_OUTPUT
+        echo "coverage_files=$coverage_files" >> $GITHUB_OUTPUT
+        echo "old_temp_files=$old_temp_files" >> $GITHUB_OUTPUT
+        echo "old_debug_files=$old_debug_files" >> $GITHUB_OUTPUT
         
-    - name: 🌿 List old branches
-      run: |
-        echo "🌿 Checking for old branches..."
+        total_artifacts=$((pyc_files + pycache_dirs + pytest_cache + coverage_files + old_temp_files + old_debug_files))
+        echo "total_artifacts=$total_artifacts" >> $GITHUB_OUTPUT
         
-        # Get list of branches
-        git branch -r --format='%(refname:short)' | grep -v 'origin/main' | grep -v 'origin/develop' > branches.txt
-        
-        if [ -s branches.txt ]; then
-          echo "Found branches:"
-          cat branches.txt
-          
-          # Check last commit date for each branch
-          while read branch; do
-            if [ "$branch" != "origin/main" ] && [ "$branch" != "origin/develop" ]; then
-              last_commit=$(git log -1 --format="%ci" "$branch" 2>/dev/null)
-              if [ -n "$last_commit" ]; then
-                echo "Branch $branch last commit: $last_commit"
-              fi
-            fi
-          done < branches.txt
+        if [ $total_artifacts -gt 0 ]; then
+          echo "cleanup-needed=true" >> $GITHUB_OUTPUT
+          echo "❌ Test artifacts found - $total_artifacts items need cleanup:" >> $GITHUB_STEP_SUMMARY
+          echo "- Python cache files (.pyc): $pyc_files" >> $GITHUB_STEP_SUMMARY
+          echo "- Python cache directories (__pycache__): $pycache_dirs" >> $GITHUB_STEP_SUMMARY
+          echo "- Pytest cache directories: $pytest_cache" >> $GITHUB_STEP_SUMMARY
+          echo "- Coverage files: $coverage_files" >> $GITHUB_STEP_SUMMARY
+          echo "- Old temp files (>7 days): $old_temp_files" >> $GITHUB_STEP_SUMMARY
+          echo "- Old debug files (>30 days): $old_debug_files" >> $GITHUB_STEP_SUMMARY
         else
-          echo "No old branches found"
+          echo "cleanup-needed=false" >> $GITHUB_OUTPUT
+          echo "✅ No test artifacts found - repository is clean" >> $GITHUB_STEP_SUMMARY
         fi
         
-    - name: 📊 Report branch status
+    - name: 🚨 Fail if artifacts found
+      if: steps.analyze-artifacts.outputs.cleanup-needed == 'true'
       run: |
-        echo "🌿 Branch cleanup analysis completed"
-        echo "Note: Manual review required before deleting branches"
+        echo "🚨 Test artifacts found - failing workflow!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🧪 Test Artifacts that need cleanup:" >> $GITHUB_STEP_SUMMARY
+        
+        # Python cache files
+        if [ ${{ steps.analyze-artifacts.outputs.pyc_files }} -gt 0 ]; then
+          echo "### Python Cache Files (.pyc):" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          find . -name "*.pyc" 2>/dev/null >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Python cache directories
+        if [ ${{ steps.analyze-artifacts.outputs.pycache_dirs }} -gt 0 ]; then
+          echo "### Python Cache Directories (__pycache__):" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          find . -name "__pycache__" -type d 2>/dev/null >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Coverage files
+        if [ ${{ steps.analyze-artifacts.outputs.coverage_files }} -gt 0 ]; then
+          echo "### Coverage Files:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          find . -name "coverage.xml" -o -name ".coverage" 2>/dev/null >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 💡 Action Required:" >> $GITHUB_STEP_SUMMARY
+        echo "Please clean up these test artifacts before the workflow can pass." >> $GITHUB_STEP_SUMMARY
+        
+        echo "🚨 Test artifacts found - failing workflow!"
+        echo "Total artifacts: ${{ steps.analyze-artifacts.outputs.total_artifacts }}"
+        exit 1
 
-  # Update and clean dependencies
-  cleanup-dependencies:
-    name: 📦 Clean Up Dependencies
-    runs-on: ubuntu-latest
-    if: github.event.inputs.cleanup-type == 'all' || github.event.inputs.cleanup-type == 'dependencies'
-    
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-      
-    - name: 📦 Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: 📦 Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        
-    - name: 📦 Check Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pip-tools
-        
-        # Check for outdated packages
-        pip list --outdated --format=json > outdated-packages.json
-        
-        # Check for unused packages
-        pip install pip-autoremove
-        pip-autoremove --dry-run > unused-packages.txt || true
-        
-        echo "📦 Python dependency analysis completed"
-        
-    - name: 📦 Check Node.js dependencies
-      run: |
-        cd docs
-        npm init -y
-        npm install
-        npm outdated --json > ../npm-outdated.json || true
-        echo "📦 Node.js dependency analysis completed"
-        
-    - name: 📊 Report dependency status
-      run: |
-        echo "📦 Dependency cleanup analysis:"
-        if [ -f "outdated-packages.json" ]; then
-          echo "- Outdated Python packages identified"
-        fi
-        if [ -f "unused-packages.txt" ]; then
-          echo "- Unused Python packages identified"
-        fi
-        if [ -f "npm-outdated.json" ]; then
-          echo "- Outdated Node.js packages identified"
-        fi
 
-  # Clean up GitHub Actions cache
-  cleanup-cache:
-    name: 💾 Clean Up Cache
-    runs-on: ubuntu-latest
-    if: github.event.inputs.cleanup-type == 'all' || github.event.inputs.cleanup-type == 'cache'
-    
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-      
-    - name: 💾 Clean up Python cache
-      run: |
-        python -m pip cache purge
-        echo "Python pip cache cleared"
-        
-    - name: 💾 Clean up Node.js cache
-      run: |
-        npm cache clean --force
-        echo "Node.js npm cache cleared"
-        
-    - name: 💾 Clean up system cache
-      run: |
-        sudo apt-get clean
-        sudo apt-get autoclean
-        echo "System cache cleared"
-
-  # Generate cleanup report
+  # Generate cleanup check report
   cleanup-report:
-    name: 📋 Cleanup Report
+    name: 📋 Cleanup Check Report
     runs-on: ubuntu-latest
-    needs: [cleanup-files, cleanup-artifacts, cleanup-branches, cleanup-dependencies, cleanup-cache]
+    needs: [check-files, check-artifacts]
     if: always()
     
     steps:
@@ -302,39 +296,41 @@ jobs:
       uses: actions/download-artifact@v4
       if: always()
       
-    - name: 📋 Generate cleanup report
+    - name: 📋 Generate cleanup check report
       run: |
-        echo "# 🧹 Automated Cleanup Report" > cleanup-report.md
-        echo "" >> cleanup-report.md
-        echo "**Date:** $(date)" >> cleanup-report.md
-        echo "**Trigger:** ${{ github.event_name }}" >> cleanup-report.md
-        echo "" >> cleanup-report.md
-        echo "## Cleanup Results" >> cleanup-report.md
-        echo "- File Cleanup: ${{ needs.cleanup-files.result }}" >> cleanup-report.md
-        echo "- Artifact Cleanup: ${{ needs.cleanup-artifacts.result }}" >> cleanup-report.md
-        echo "- Branch Cleanup: ${{ needs.cleanup-branches.result }}" >> cleanup-report.md
-        echo "- Dependency Cleanup: ${{ needs.cleanup-dependencies.result }}" >> cleanup-report.md
-        echo "- Cache Cleanup: ${{ needs.cleanup-cache.result }}" >> cleanup-report.md
-        echo "" >> cleanup-report.md
-        echo "## Recommendations" >> cleanup-report.md
-        echo "1. Review outdated dependencies and update if needed" >> cleanup-report.md
-        echo "2. Consider deleting old branches that are no longer needed" >> cleanup-report.md
-        echo "3. Monitor disk usage and clean up large files" >> cleanup-report.md
-        echo "4. Set up automated cleanup schedules" >> cleanup-report.md
-        echo "" >> cleanup-report.md
-        echo "## Next Cleanup" >> cleanup-report.md
-        echo "Scheduled for next Sunday at 1 AM UTC" >> cleanup-report.md
+        echo "# 🔍 Cleanup Check Report" > cleanup-check-report.md
+        echo "" >> cleanup-check-report.md
+        echo "**Date:** $(date)" >> cleanup-check-report.md
+        echo "**Trigger:** ${{ github.event_name }}" >> cleanup-check-report.md
+        echo "**Check Type:** ${{ github.event.inputs.check-type || 'all' }}" >> cleanup-check-report.md
+        echo "" >> cleanup-check-report.md
+        echo "## Check Results" >> cleanup-check-report.md
+        echo "- File Check: ${{ needs.check-files.result }}" >> cleanup-check-report.md
+        echo "- Artifact Check: ${{ needs.check-artifacts.result }}" >> cleanup-check-report.md
+        echo "" >> cleanup-check-report.md
         
-    - name: 📊 Upload cleanup report
+        if [ "${{ needs.check-files.result }}" = "success" ] && [ "${{ needs.check-artifacts.result }}" = "success" ]; then
+          echo "## ✅ Repository Status: CLEAN" >> cleanup-check-report.md
+          echo "The repository passed all cleanup checks. No action required." >> cleanup-check-report.md
+        else
+          echo "## ❌ Repository Status: NOT CLEAN" >> cleanup-check-report.md
+          echo "The repository failed cleanup checks. Please review the failed checks above and clean up the identified files." >> cleanup-check-report.md
+        fi
+        
+        echo "" >> cleanup-check-report.md
+        echo "## Next Check" >> cleanup-check-report.md
+        echo "Scheduled for next Sunday at 1 AM UTC" >> cleanup-check-report.md
+        
+    - name: 📊 Upload cleanup check report
       uses: actions/upload-artifact@v4
       with:
-        name: cleanup-report
-        path: cleanup-report.md
+        name: cleanup-check-report
+        path: cleanup-check-report.md
         retention-days: 30
 
-  # Notify on cleanup completion
-  notify-cleanup:
-    name: 📢 Notify Cleanup
+  # Notify on cleanup check completion
+  notify-cleanup-check:
+    name: 📢 Notify Cleanup Check
     runs-on: ubuntu-latest
     needs: [cleanup-report]
     if: always()
@@ -343,12 +339,13 @@ jobs:
     - name: ✅ Success notification
       if: ${{ needs.cleanup-report.result == 'success' }}
       run: |
-        echo "🎉 Automated cleanup completed successfully!"
-        echo "All cleanup tasks have been executed."
+        echo "🎉 Cleanup check completed successfully!"
+        echo "Repository is clean - no action required."
         
     - name: ❌ Failure notification
       if: ${{ needs.cleanup-report.result == 'failure' }}
       run: |
-        echo "❌ Some cleanup tasks failed!"
-        echo "Check the logs for details."
+        echo "❌ Cleanup check failed!"
+        echo "Repository is not clean - please review and clean up the identified files."
+        echo "Check the workflow logs for detailed information about what needs to be cleaned."
         exit 1

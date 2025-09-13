@@ -2,19 +2,87 @@
 
 # Local GitHub Actions Monitor
 # Monitors all workflow runs and collects detailed logs from failed runs
-# Waits until ALL workflows are complete before showing final results
-# Usage: ./_local_action_monitor [commit-hash] [max-wait-minutes]
+# Supports two modes: wait for all workflows or stop on first failure
+# Usage: ./_local_action_monitor [OPTIONS] [COMMIT_HASH]
+#        ./_local_action_monitor --help  # Show detailed help
 
 set -euo pipefail
 
 # Configuration
 REPO="zsenarchitect/rock-paper-scissors"
 CHECK_INTERVAL=30  # seconds
-MAX_WAIT_MINUTES=${2:-60}  # Default 60 minutes max wait
-COMMIT_HASH=${1:-"main"}  # Default to main branch
+MAX_WAIT_MINUTES=60  # Default 60 minutes max wait
+COMMIT_HASH="main"  # Default to main branch
+MODE="wait-full"  # Default mode: wait for all workflows to complete
 LOG_DIR="DEBUG/logs/action-monitoring"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 LOG_FILE="${LOG_DIR}/action-monitor_${TIMESTAMP}.log"
+
+# Parse command line arguments
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --wait-full)
+                MODE="wait-full"
+                shift
+                ;;
+            --stop-on-fail)
+                MODE="stop-on-fail"
+                shift
+                ;;
+            --help|-h)
+                show_help
+                exit 0
+                ;;
+            --commit=*)
+                COMMIT_HASH="${1#*=}"
+                shift
+                ;;
+            --max-wait=*)
+                MAX_WAIT_MINUTES="${1#*=}"
+                shift
+                ;;
+            --interval=*)
+                CHECK_INTERVAL="${1#*=}"
+                shift
+                ;;
+            *)
+                # If it's not a flag, treat it as commit hash (backward compatibility)
+                if [[ "$1" != "--"* ]]; then
+                    COMMIT_HASH="$1"
+                fi
+                shift
+                ;;
+        esac
+    done
+}
+
+# Show help message
+show_help() {
+    echo "Local GitHub Actions Monitor"
+    echo "==========================="
+    echo ""
+    echo "Usage: $0 [OPTIONS] [COMMIT_HASH]"
+    echo ""
+    echo "Options:"
+    echo "  --wait-full        Wait for all workflows to complete, then show results (default)"
+    echo "  --stop-on-fail     Stop immediately when any failure is detected"
+    echo "  --commit=HASH      Specify commit hash or branch name (default: main)"
+    echo "  --max-wait=MINUTES Maximum wait time in minutes (default: 60)"
+    echo "  --interval=SECONDS Check interval in seconds (default: 30)"
+    echo "  --help, -h         Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                                    # Monitor main branch, wait for all"
+    echo "  $0 --stop-on-fail                    # Monitor main branch, stop on first failure"
+    echo "  $0 --commit=abc123 --wait-full       # Monitor specific commit, wait for all"
+    echo "  $0 --stop-on-fail --max-wait=30      # Stop on fail, max 30 minutes wait"
+    echo ""
+    echo "Modes:"
+    echo "  wait-full:    Waits for ALL workflows to complete (success or failure), then shows results"
+    echo "  stop-on-fail: Stops immediately when ANY workflow fails, allowing you to fix issues"
+    echo ""
+}
 
 # Colors for output
 RED='\033[0;31m'
@@ -252,15 +320,16 @@ collect_failed_logs() {
     return 1  # Indicate failures found
 }
 
-# Function to show countdown timer
+# Function to show countdown timer (interruptible)
 countdown_timer() {
     local seconds=$1
     local countdown=$seconds
     
     # Clear the line and show initial countdown
-    printf "\r${YELLOW}🔄 Next check in %2d seconds...${NC}" $countdown
+    printf "\r${YELLOW}🔄 Next check in %2d seconds... (Press Ctrl+C to interrupt)${NC}" $countdown
     
     while [ $countdown -gt 0 ]; do
+        # Use a shorter sleep to make it more responsive to interrupts
         sleep 1
         countdown=$((countdown - 1))
         
@@ -275,14 +344,42 @@ countdown_timer() {
                     bar="${bar}░"
                 fi
             done
-            printf "\r${YELLOW}🔄 Next check in %2d seconds... [%s]${NC}" $countdown "$bar"
+            printf "\r${YELLOW}🔄 Next check in %2d seconds... [%s] (Press Ctrl+C to interrupt)${NC}" $countdown "$bar"
         else
-            printf "\r${YELLOW}🔄 Next check in %2d seconds...${NC}" $countdown
+            printf "\r${YELLOW}🔄 Next check in %2d seconds... (Press Ctrl+C to interrupt)${NC}" $countdown
         fi
     done
     
     # Clear the line and show completion
     printf "\r${GREEN}✅ Check complete! Starting next check...${NC}\n"
+}
+
+# Function to check for failures and terminate immediately if found
+check_for_failures() {
+    local commit=$1
+    local runs
+    runs=$(get_workflow_runs "$commit")
+    
+    if [ -z "$runs" ]; then
+        return 0  # No workflows to check
+    fi
+    
+    # Check for any failed workflows
+    while IFS= read -r line; do
+        if [ -n "$line" ]; then
+            local status=$(echo "$line" | cut -d'|' -f2)
+            local conclusion=$(echo "$line" | cut -d'|' -f3)
+            local workflow_name=$(echo "$line" | cut -d'|' -f4)
+            
+            if [ "$status" = "completed" ] && [ "$conclusion" != "success" ]; then
+                log "ERROR" "🚨 FAILURE DETECTED: $workflow_name failed with conclusion: $conclusion"
+                log "ERROR" "🛑 Terminating monitor immediately to work on fixing the failed workflow"
+                return 1  # Found failures
+            fi
+        fi
+    done <<< "$runs"
+    
+    return 0  # No failures found
 }
 
 # Function to wait for workflows to complete
@@ -296,7 +393,12 @@ wait_for_completion() {
     log "INFO" "⏱️  Max wait time: $MAX_WAIT_MINUTES minutes"
     log "INFO" "🔄 Check interval: $CHECK_INTERVAL seconds"
     log "INFO" "📝 Logs will be saved to: $LOG_FILE"
-    log "INFO" "🎯 Will wait until ALL workflows are complete (success or failure)"
+    log "INFO" "🎯 Mode: $MODE"
+    if [ "$MODE" = "stop-on-fail" ]; then
+        log "INFO" "🚨 Will terminate immediately if any failures are detected"
+    else
+        log "INFO" "🎯 Will wait until ALL workflows are complete (success or failure)"
+    fi
     log "INFO" "⏰ Filtering for workflows from last 10 minutes only"
     
     # First check - if no workflows, exit immediately
@@ -305,6 +407,14 @@ wait_for_completion() {
     
     # Show current status
     get_status_summary "$commit"
+    
+    # Check for failures immediately (only in stop-on-fail mode)
+    if [ "$MODE" = "stop-on-fail" ]; then
+        if ! check_for_failures "$commit"; then
+            log "ERROR" "💥 FAILURES DETECTED - Terminating monitor to work on fixes"
+            return 1
+        fi
+    fi
     
     # Check if there are any workflows to monitor
     local runs
@@ -344,6 +454,14 @@ wait_for_completion() {
         
         # Show current status
         get_status_summary "$commit"
+        
+        # Check for failures (only in stop-on-fail mode)
+        if [ "$MODE" = "stop-on-fail" ]; then
+            if ! check_for_failures "$commit"; then
+                log "ERROR" "💥 FAILURES DETECTED - Terminating monitor to work on fixes"
+                return 1
+            fi
+        fi
         
         # Check if all workflows are complete
         if check_all_complete "$commit"; then
@@ -409,14 +527,33 @@ show_final_results() {
     fi
 }
 
+# Signal handler for graceful shutdown
+cleanup() {
+    log "WARN" ""
+    log "WARN" "🛑 INTERRUPT DETECTED - Gracefully shutting down monitor..."
+    log "WARN" "📝 Current status has been logged to: $LOG_FILE"
+    log "WARN" "🔧 You can run the monitor again to continue monitoring"
+    log "WARN" "💡 Use Ctrl+C again to force exit if needed"
+    exit 130  # Standard exit code for SIGINT
+}
+
+# Set up signal handlers
+trap cleanup SIGINT SIGTERM
+
 # Main execution
 main() {
+    # Parse command line arguments first
+    parse_args "$@"
+    
     log "INFO" "🚀 Local GitHub Actions Monitor Started"
     log "INFO" "======================================"
     log "INFO" "Repository: $REPO"
     log "INFO" "Commit/Branch: $COMMIT_HASH"
+    log "INFO" "Mode: $MODE"
     log "INFO" "Max Wait: $MAX_WAIT_MINUTES minutes"
+    log "INFO" "Check Interval: $CHECK_INTERVAL seconds"
     log "INFO" "Log File: $LOG_FILE"
+    log "INFO" "💡 Press Ctrl+C to interrupt and exit gracefully"
     log "INFO" "======================================"
     
     # Check if gh CLI is available
@@ -441,14 +578,19 @@ main() {
     fi
     
     # Wait for workflows to complete
-    wait_for_completion "$COMMIT_HASH"
-    
-    # Show final results
-    if show_final_results "$COMMIT_HASH"; then
-        log "SUCCESS" "🎉 All workflows passed! Monitor completed successfully."
-        exit 0
+    if wait_for_completion "$COMMIT_HASH"; then
+        # Show final results only if no failures were detected
+        if show_final_results "$COMMIT_HASH"; then
+            log "SUCCESS" "🎉 All workflows passed! Monitor completed successfully."
+            exit 0
+        else
+            log "ERROR" "💥 Some workflows failed! Check the logs for details."
+            exit 1
+        fi
     else
-        log "ERROR" "💥 Some workflows failed! Check the logs for details."
+        # Failures were detected during monitoring
+        log "ERROR" "💥 Failures detected during monitoring! Monitor terminated early."
+        log "ERROR" "🔧 Work on fixing the failed workflows and run the monitor again."
         exit 1
     fi
 }
