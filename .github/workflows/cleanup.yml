@@ -29,14 +29,31 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.inputs.cleanup-type == 'all' || github.event.inputs.cleanup-type == 'debug-files'
     
+    # Only run if there are actually files to clean up
+    # This prevents unnecessary CI runs
+    
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
       
+    - name: 🔍 Check if cleanup is needed
+      id: check-cleanup
+      run: |
+        echo "🔍 Checking if cleanup is needed..." >> $GITHUB_STEP_SUMMARY
+        # Check for files that need cleanup
+        if [ -n "$(find . -maxdepth 1 -name 'debug_*' -o -name '*.debug' -o -name '*.log' -o -name '*.tmp' -o -name '*.temp' -o -name 'test_*' -o -name '*_test')" ]; then
+          echo "cleanup-needed=true" >> $GITHUB_OUTPUT
+          echo "✅ Cleanup needed - files found" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "cleanup-needed=false" >> $GITHUB_OUTPUT
+          echo "ℹ️ No cleanup needed - repository is clean" >> $GITHUB_STEP_SUMMARY
+        fi
+        
     - name: 🧹 Run cleanup script
+      if: steps.check-cleanup.outputs.cleanup-needed == 'true'
       run: |
         echo "🧹 Starting cleanup process..." >> $GITHUB_STEP_SUMMARY
-        chmod +x cleanup.sh
+        chmod +x cleanup-simple.sh
         
         # Create cleanup log
         echo "Starting automated cleanup..." > cleanup-execution.log
@@ -47,7 +64,7 @@ jobs:
         echo "" >> cleanup-execution.log
         
         # Run cleanup with detailed logging
-        ./cleanup.sh 2>&1 | tee -a cleanup-execution.log || true
+        ./cleanup-simple.sh 2>&1 | tee -a cleanup-execution.log || true
         
         echo "✅ Cleanup script completed" >> $GITHUB_STEP_SUMMARY
         

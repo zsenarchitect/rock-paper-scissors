@@ -112,15 +112,31 @@ temp/
 # Debug folder (not git-tracked)
 DEBUG/
 
-# Temporary files
-*.tmp
-*.temp
+# Debug files - IGNORE in root, but allow in DEBUG/ directory
 debug_*
-*_test
 *.debug
 *.log
 *.trace
 *.dump
 
-# Test files (moved to temp/tests directory)
-# CI test scripts are now in temp/tests/ and are tracked
+# Test files - IGNORE in root, but allow in temp/tests/ directory
+test_*
+*_test.py
+*.test
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+
+# But ALLOW essential test files in temp/tests/
+!temp/tests/test_*.py
+
+# But ALLOW debug files in DEBUG/ directory
+!DEBUG/**/*.log
+!DEBUG/**/*.debug
+!DEBUG/**/*.trace
+!DEBUG/**/*.dump
