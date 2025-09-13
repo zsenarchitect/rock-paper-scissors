@@ -100,7 +100,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
         
     - name: 📥 Cache pip dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -161,7 +161,7 @@ jobs:
         retention-days: 30
         
     - name: 📊 Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: backend
