@@ -36,7 +36,7 @@ jobs:
     - name: 🔍 Python security scan
       run: |
         pip install safety bandit semgrep
-        safety check -r requirements.txt --json --output json > safety-report.json
+        safety check -r requirements.txt --output json > safety-report.json
         bandit -r ai_training/ -f json -o bandit-report.json || true
         
     - name: 🔍 JavaScript security scan
