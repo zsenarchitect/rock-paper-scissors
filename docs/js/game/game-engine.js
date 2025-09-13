@@ -133,24 +133,59 @@ class GameEngine {
         const symbols = GameConfig.game.symbols;
         const countPerSymbol = GameConfig.game.countPerSymbol;
         
+        logger.info('Creating initial entities', {
+            symbols,
+            countPerSymbol,
+            totalExpected: symbols.length * countPerSymbol
+        });
+        
         for (let team = 1; team <= 3; team++) {
             const symbol = symbols[team - 1];
             this.battleStats.teamCounts[team] = countPerSymbol;
             
             for (let i = 0; i < countPerSymbol; i++) {
-                const entity = new BaseEntity(
-                    `${symbol.toLowerCase()}_${team}_${i}`,
-                    symbol,
-                    this.getRandomPosition(),
-                    team
-                );
+                let entity;
+                
+                // Create specific entity type based on symbol
+                switch (symbol) {
+                    case 'Rock':
+                        entity = new RockEntity(
+                            `${symbol.toLowerCase()}_${team}_${i}`,
+                            this.getRandomPosition(),
+                            team
+                        );
+                        break;
+                    case 'Paper':
+                        entity = new PaperEntity(
+                            `${symbol.toLowerCase()}_${team}_${i}`,
+                            this.getRandomPosition(),
+                            team
+                        );
+                        break;
+                    case 'Scissors':
+                        entity = new ScissorsEntity(
+                            `${symbol.toLowerCase()}_${team}_${i}`,
+                            this.getRandomPosition(),
+                            team
+                        );
+                        break;
+                    default:
+                        entity = new BaseEntity(
+                            `${symbol.toLowerCase()}_${team}_${i}`,
+                            symbol,
+                            this.getRandomPosition(),
+                            team
+                        );
+                }
                 
                 this.entities.set(entity.id, entity);
             }
+            
+            logger.info(`Created ${countPerSymbol} ${symbol} entities for team ${team}`);
         }
         
         this.battleStats.activePlayers = this.entities.size;
-        logger.info('Initial entities created', {
+        logger.info('Initial entities created successfully', {
             totalEntities: this.entities.size,
             teamCounts: this.battleStats.teamCounts
         });

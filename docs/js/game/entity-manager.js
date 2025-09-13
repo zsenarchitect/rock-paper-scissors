@@ -11,9 +11,9 @@ class EntityManager {
 
     // Initialize entity types
     initialize() {
-        this.entityTypes.set('Rock', BaseEntity);
-        this.entityTypes.set('Paper', BaseEntity);
-        this.entityTypes.set('Scissors', BaseEntity);
+        this.entityTypes.set('Rock', RockEntity);
+        this.entityTypes.set('Paper', PaperEntity);
+        this.entityTypes.set('Scissors', ScissorsEntity);
         
         logger.info('Entity types registered', Array.from(this.entityTypes.keys()));
     }

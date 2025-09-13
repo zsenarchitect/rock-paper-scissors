@@ -155,7 +155,29 @@ class App {
         }
         
         logger.info('Starting game...');
-        this.gameEngine.start();
+        
+        try {
+            this.gameEngine.start();
+            
+            // Verify entities were created
+            setTimeout(() => {
+                const entityCount = this.gameEngine.entities.size;
+                logger.info(`Game started - Entity count: ${entityCount}`);
+                
+                if (entityCount === 0) {
+                    logger.error('No entities created! Attempting to create manually...');
+                    this.gameEngine.createInitialEntities();
+                }
+                
+                // Update UI to show initial state
+                this.updateUI();
+            }, 100);
+            
+        } catch (error) {
+            logger.error('Failed to start game', error);
+            this.showError('Failed to start game. Please refresh the page.');
+            return;
+        }
         
         // Start UI update loop
         this.startUIUpdateLoop();
