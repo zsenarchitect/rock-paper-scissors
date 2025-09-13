@@ -244,8 +244,8 @@ jobs:
     - name: 🧹 Run cleanup script
       run: |
         echo "🧹 Running cleanup script..." >> $GITHUB_STEP_SUMMARY
-        chmod +x cleanup.sh
-        ./cleanup.sh 2>&1 | tee cleanup-output.log
+        chmod +x cleanup-simple.sh
+        ./cleanup-simple.sh 2>&1 | tee cleanup-output.log
         echo "✅ Cleanup script completed" >> $GITHUB_STEP_SUMMARY
         
     - name: ✅ Validate project structure
