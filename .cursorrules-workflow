@@ -93,6 +93,28 @@ gh pr merge --squash --delete-branch
 gh pr comment --body "PR ready for review. Changes implemented and tested."
 ```
 
+#### 8. **Post-Merge Cleanup Phase**
+```bash
+# After merging a PR, automatically clean up branches
+# Check if we're on the merged branch
+current_branch=$(git branch --show-current)
+
+# If we're on a feature/bugfix branch that was just merged
+if [[ "$current_branch" =~ ^(feature|bugfix|enhancement|hotfix)/ ]]; then
+    # Switch to main branch
+    git checkout main
+    git pull origin main
+    
+    # Delete local branch
+    git branch -d "$current_branch"
+    
+    # Delete remote branch (if it still exists)
+    git push origin --delete "$current_branch" 2>/dev/null || true
+    
+    echo "✅ Cleaned up local and remote branch: $current_branch"
+fi
+```
+
 ## 🔄 WORKFLOW AUTOMATION RULES
 
 ### Issue Type Detection
@@ -260,6 +282,16 @@ git branch -d feature/issue-X-description
 
 # Delete remote branch
 git push origin --delete feature/issue-X-description
+
+# Automatic cleanup after PR merge
+current_branch=$(git branch --show-current)
+if [[ "$current_branch" =~ ^(feature|bugfix|enhancement|hotfix)/ ]]; then
+    git checkout main
+    git pull origin main
+    git branch -d "$current_branch"
+    git push origin --delete "$current_branch" 2>/dev/null || true
+    echo "✅ Cleaned up local and remote branch: $current_branch"
+fi
 ```
 
 ### PR Management
@@ -287,8 +319,8 @@ gh pr merge --squash --delete-branch
 - [ ] **CRITICAL**: Action monitor run before merge: `./.github/_local_action_monitor main`
 - [ ] All GitHub Actions passing (green status)
 - [ ] PR merged if requested AND actions are passing
+- [ ] **AUTOMATIC**: Local and remote branch cleanup after merge
 - [ ] TODO list completed
-- [ ] Cleanup performed (delete branches if merged)
 
 ## 🎯 SUCCESS METRICS
 
