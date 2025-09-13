@@ -1,4 +1,4 @@
-name: 🔍 Cleanup Check & Analysis
+name: 🔍 Cleanup Check
 
 on:
   schedule:
