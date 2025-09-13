@@ -1,0 +1,319 @@
+# Development Commands - Cursor IDE Rules
+
+## 💻 DEVELOPMENT COMMAND CATEGORIES
+
+### 🏗️ Code Generation Commands
+- **`generate component name`** - Generate new React/Vue component
+- **`generate function name`** - Generate new function with boilerplate
+- **`generate class name`** - Generate new class with structure
+- **`generate api endpoint`** - Generate API endpoint with CRUD operations
+- **`generate test file`** - Generate test file for existing code
+- **`generate documentation`** - Generate documentation for code
+
+### 🧪 Testing Commands
+- **`run tests`** - Run all tests in project
+- **`run tests file`** - Run tests for specific file
+- **`run tests coverage`** - Run tests with coverage report
+- **`run tests watch`** - Run tests in watch mode
+- **`run tests debug`** - Run tests in debug mode
+- **`generate test data`** - Generate test data for testing
+
+### 🐛 Debugging Commands
+- **`debug file`** - Start debugging session for file
+- **`debug function name`** - Debug specific function
+- **`debug test name`** - Debug specific test
+- **`debug api endpoint`** - Debug API endpoint
+- **`debug performance`** - Debug performance issues
+- **`debug memory`** - Debug memory leaks
+
+### 🔍 Code Analysis Commands
+- **`analyze code`** - Analyze code quality and issues
+- **`analyze performance`** - Analyze performance bottlenecks
+- **`analyze security`** - Analyze security vulnerabilities
+- **`analyze dependencies`** - Analyze dependency issues
+- **`analyze complexity`** - Analyze code complexity
+- **`analyze coverage`** - Analyze test coverage
+
+### 🚀 Build Commands
+- **`build project`** - Build entire project
+- **`build component`** - Build specific component
+- **`build production`** - Build for production
+- **`build development`** - Build for development
+- **`build staging`** - Build for staging
+- **`build docker`** - Build Docker container
+
+### 📦 Package Commands
+- **`install dependencies`** - Install all dependencies
+- **`install package name`** - Install specific package
+- **`update dependencies`** - Update all dependencies
+- **`update package name`** - Update specific package
+- **`remove package name`** - Remove specific package
+- **`audit packages`** - Audit package security
+
+## 🎯 CODE QUALITY STANDARDS
+
+### Production-Ready Code Requirements
+- **Error Handling**: Comprehensive try-catch blocks
+- **Input Validation**: Validate all inputs and parameters
+- **Logging**: Appropriate logging levels and messages
+- **Documentation**: Clear comments and documentation
+- **Performance**: Optimized for speed and memory usage
+- **Security**: Secure coding practices implemented
+
+### Code Generation Patterns
+```javascript
+// Function Generation Pattern
+function functionName(params) {
+    try {
+        // Input validation
+        if (!params) throw new Error('Parameters required');
+        
+        // Implementation
+        const result = processData(params);
+        
+        // Logging
+        console.log('Function completed successfully');
+        
+        return result;
+    } catch (error) {
+        console.error('Function failed:', error.message);
+        throw error;
+    }
+}
+```
+
+### Testing Patterns
+```javascript
+// Test Generation Pattern
+describe('Component/Function Name', () => {
+    beforeEach(() => {
+        // Setup
+    });
+    
+    afterEach(() => {
+        // Cleanup
+    });
+    
+    it('should handle valid input', () => {
+        // Test implementation
+    });
+    
+    it('should handle invalid input', () => {
+        // Error handling test
+    });
+    
+    it('should handle edge cases', () => {
+        // Edge case testing
+    });
+});
+```
+
+## 🧪 TESTING COMMAND PATTERNS
+
+### Unit Testing Workflow
+```
+1. generate test file [component/function]
+2. write test cases
+3. run tests
+4. fix failing tests
+5. run tests coverage
+6. ensure 100% coverage
+```
+
+### Integration Testing Workflow
+```
+1. generate integration test
+2. setup test environment
+3. run integration tests
+4. debug failures
+5. fix issues
+6. re-run tests
+```
+
+### Performance Testing Workflow
+```
+1. analyze performance
+2. identify bottlenecks
+3. optimize code
+4. run performance tests
+5. measure improvements
+6. document results
+```
+
+## 🐛 DEBUGGING COMMAND PATTERNS
+
+### Debug Session Workflow
+```
+1. debug [file/function/test]
+2. set breakpoints
+3. run debug session
+4. analyze variables
+5. step through code
+6. identify issues
+7. fix problems
+8. verify fixes
+```
+
+### Performance Debug Workflow
+```
+1. debug performance
+2. profile application
+3. identify slow areas
+4. optimize bottlenecks
+5. measure improvements
+6. document changes
+```
+
+## 🔍 CODE ANALYSIS COMMAND PATTERNS
+
+### Code Quality Analysis
+```
+1. analyze code
+2. identify issues
+3. fix problems
+4. re-analyze
+5. ensure quality
+6. document improvements
+```
+
+### Security Analysis
+```
+1. analyze security
+2. identify vulnerabilities
+3. fix security issues
+4. re-analyze
+5. ensure security
+6. document fixes
+```
+
+## 🚀 BUILD COMMAND PATTERNS
+
+### Development Build
+```
+1. build development
+2. check for errors
+3. fix issues
+4. test build
+5. verify functionality
+```
+
+### Production Build
+```
+1. build production
+2. optimize assets
+3. minify code
+4. test production build
+5. verify performance
+6. deploy
+```
+
+## 📦 PACKAGE COMMAND PATTERNS
+
+### Dependency Management
+```
+1. audit packages
+2. update dependencies
+3. test updates
+4. fix breaking changes
+5. verify functionality
+6. commit changes
+```
+
+### New Package Integration
+```
+1. install package [name]
+2. configure package
+3. test integration
+4. update documentation
+5. commit changes
+```
+
+## 🎯 COMMAND RESPONSES
+
+### Success Responses
+- ✅ Code generated successfully
+- ✅ Tests passed successfully
+- ✅ Debug session completed
+- ✅ Analysis completed successfully
+- ✅ Build completed successfully
+- ✅ Package installed successfully
+
+### Error Responses
+- ❌ Code generation failed
+- ❌ Tests failed
+- ❌ Debug session failed
+- ❌ Analysis found issues
+- ❌ Build failed
+- ❌ Package installation failed
+
+### Warning Responses
+- ⚠️ Code quality issues found
+- ⚠️ Test coverage below threshold
+- ⚠️ Performance issues detected
+- ⚠️ Security vulnerabilities found
+- ⚠️ Build warnings present
+- ⚠️ Package conflicts detected
+
+## 🔧 DEVELOPMENT TOOLS INTEGRATION
+
+### IDE Integration
+- **Cursor AI**: Primary development assistant
+- **VS Code**: Development environment
+- **Git**: Version control
+- **Terminal**: Command execution
+- **Debugger**: Code debugging
+- **Linter**: Code quality checking
+
+### Testing Tools
+- **Jest**: Unit testing framework
+- **Cypress**: End-to-end testing
+- **Playwright**: Browser testing
+- **Coverage**: Test coverage analysis
+- **Mock**: Test mocking utilities
+
+### Build Tools
+- **Webpack**: Module bundler
+- **Babel**: JavaScript transpiler
+- **ESLint**: Code linting
+- **Prettier**: Code formatting
+- **Docker**: Containerization
+
+## 📝 USAGE EXAMPLES
+
+### Code Generation
+```
+User: "generate component UserProfile"
+AI: Creates React component with props, state, and lifecycle methods
+
+User: "generate function calculateTotal"
+AI: Creates function with input validation, error handling, and documentation
+
+User: "generate api endpoint /users"
+AI: Creates REST API endpoint with CRUD operations and validation
+```
+
+### Testing
+```
+User: "run tests"
+AI: Executes all tests and reports results
+
+User: "run tests UserProfile.test.js"
+AI: Runs tests for specific component
+
+User: "run tests coverage"
+AI: Runs tests and generates coverage report
+```
+
+### Debugging
+```
+User: "debug UserProfile component"
+AI: Starts debugging session with breakpoints
+
+User: "debug calculateTotal function"
+AI: Debugs specific function with step-through execution
+
+User: "debug performance"
+AI: Profiles application and identifies bottlenecks
+```
+
+This modular approach provides clear, categorized commands for all development activities while maintaining comprehensive standards and patterns for effective code development and quality assurance.

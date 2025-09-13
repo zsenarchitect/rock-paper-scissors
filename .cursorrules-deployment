@@ -1,0 +1,313 @@
+# Deployment Commands - Cursor IDE Rules
+
+## 🚀 DEPLOYMENT COMMAND CATEGORIES
+
+### 🌐 Environment Commands
+- **`deploy to staging`** - Deploy to staging environment
+- **`deploy to production`** - Deploy to production environment
+- **`deploy to development`** - Deploy to development environment
+- **`deploy to preview`** - Deploy to preview environment
+- **`rollback deployment`** - Rollback to previous deployment
+- **`check deployment status`** - Check current deployment status
+
+### 🔄 CI/CD Commands
+- **`run pipeline`** - Trigger CI/CD pipeline
+- **`run pipeline stage`** - Run specific pipeline stage
+- **`check pipeline status`** - Check pipeline execution status
+- **`retry pipeline`** - Retry failed pipeline
+- **`cancel pipeline`** - Cancel running pipeline
+- **`view pipeline logs`** - View pipeline execution logs
+
+### 📊 Monitoring Commands
+- **`monitor deployment`** - Monitor deployment progress
+- **`monitor performance`** - Monitor application performance
+- **`monitor errors`** - Monitor error rates and logs
+- **`monitor resources`** - Monitor resource usage
+- **`monitor uptime`** - Monitor application uptime
+- **`monitor alerts`** - Monitor system alerts
+
+### 🔧 Configuration Commands
+- **`update config`** - Update deployment configuration
+- **`validate config`** - Validate configuration settings
+- **`backup config`** - Backup current configuration
+- **`restore config`** - Restore configuration from backup
+- **`compare configs`** - Compare configuration versions
+- **`export config`** - Export configuration settings
+
+### 🛡️ Security Commands
+- **`scan security`** - Run security vulnerability scan
+- **`update certificates`** - Update SSL certificates
+- **`rotate secrets`** - Rotate deployment secrets
+- **`audit permissions`** - Audit deployment permissions
+- **`check compliance`** - Check security compliance
+- **`generate security report`** - Generate security report
+
+### 📈 Performance Commands
+- **`optimize performance`** - Optimize application performance
+- **`analyze bottlenecks`** - Analyze performance bottlenecks
+- **`scale resources`** - Scale deployment resources
+- **`load test`** - Run load testing
+- **`stress test`** - Run stress testing
+- **`benchmark performance`** - Benchmark performance metrics
+
+## 🎯 DEPLOYMENT WORKFLOW PATTERNS
+
+### Standard Deployment Workflow
+```
+1. check deployment status
+2. validate config
+3. run pipeline
+4. monitor deployment
+5. verify deployment
+6. update monitoring
+```
+
+### Production Deployment Workflow
+```
+1. check pipeline status
+2. run security scan
+3. backup current deployment
+4. deploy to production
+5. monitor deployment
+6. verify functionality
+7. update monitoring
+8. notify stakeholders
+```
+
+### Rollback Workflow
+```
+1. check deployment status
+2. identify rollback target
+3. backup current state
+4. rollback deployment
+5. verify rollback
+6. monitor stability
+7. update documentation
+```
+
+## 🔄 CI/CD COMMAND PATTERNS
+
+### Pipeline Execution
+```
+1. run pipeline
+2. monitor pipeline status
+3. check for failures
+4. retry if needed
+5. verify success
+6. proceed to deployment
+```
+
+### Pipeline Debugging
+```
+1. view pipeline logs
+2. identify failure points
+3. fix issues
+4. retry pipeline
+5. verify fixes
+6. complete pipeline
+```
+
+## 📊 MONITORING COMMAND PATTERNS
+
+### Deployment Monitoring
+```
+1. monitor deployment
+2. check deployment status
+3. verify functionality
+4. monitor performance
+5. check error rates
+6. ensure stability
+```
+
+### Performance Monitoring
+```
+1. monitor performance
+2. analyze metrics
+3. identify issues
+4. optimize if needed
+5. verify improvements
+6. document changes
+```
+
+## 🛡️ SECURITY COMMAND PATTERNS
+
+### Security Scanning
+```
+1. scan security
+2. analyze vulnerabilities
+3. fix critical issues
+4. update security patches
+5. re-scan security
+6. verify compliance
+```
+
+### Security Maintenance
+```
+1. update certificates
+2. rotate secrets
+3. audit permissions
+4. check compliance
+5. generate security report
+6. update documentation
+```
+
+## 📈 PERFORMANCE COMMAND PATTERNS
+
+### Performance Optimization
+```
+1. analyze bottlenecks
+2. identify optimization opportunities
+3. implement optimizations
+4. test performance
+5. measure improvements
+6. document changes
+```
+
+### Load Testing
+```
+1. prepare load test
+2. run load test
+3. analyze results
+4. identify issues
+5. optimize if needed
+6. re-test performance
+```
+
+## 🎯 COMMAND RESPONSES
+
+### Success Responses
+- ✅ Deployment completed successfully
+- ✅ Pipeline executed successfully
+- ✅ Monitoring configured successfully
+- ✅ Configuration updated successfully
+- ✅ Security scan passed successfully
+- ✅ Performance optimized successfully
+
+### Error Responses
+- ❌ Deployment failed
+- ❌ Pipeline execution failed
+- ❌ Monitoring configuration failed
+- ❌ Configuration update failed
+- ❌ Security scan found vulnerabilities
+- ❌ Performance optimization failed
+
+### Warning Responses
+- ⚠️ Deployment warnings detected
+- ⚠️ Pipeline has warnings
+- ⚠️ Monitoring alerts active
+- ⚠️ Configuration validation warnings
+- ⚠️ Security vulnerabilities found
+- ⚠️ Performance issues detected
+
+## 🔧 DEPLOYMENT TOOLS INTEGRATION
+
+### CI/CD Tools
+- **GitHub Actions**: Primary CI/CD platform
+- **Docker**: Containerization
+- **Kubernetes**: Container orchestration
+- **Terraform**: Infrastructure as code
+- **Ansible**: Configuration management
+
+### Monitoring Tools
+- **Prometheus**: Metrics collection
+- **Grafana**: Metrics visualization
+- **ELK Stack**: Log aggregation
+- **New Relic**: Application monitoring
+- **DataDog**: Infrastructure monitoring
+
+### Security Tools
+- **Snyk**: Vulnerability scanning
+- **OWASP ZAP**: Security testing
+- **HashiCorp Vault**: Secret management
+- **Let's Encrypt**: Certificate management
+- **Security Headers**: Security configuration
+
+## 📝 USAGE EXAMPLES
+
+### Deployment
+```
+User: "deploy to staging"
+AI: Triggers staging deployment, monitors progress, reports status
+
+User: "deploy to production"
+AI: Triggers production deployment with security checks and monitoring
+
+User: "rollback deployment"
+AI: Rolls back to previous stable version and verifies functionality
+```
+
+### CI/CD
+```
+User: "run pipeline"
+AI: Triggers CI/CD pipeline and monitors execution
+
+User: "check pipeline status"
+AI: Shows current pipeline status and any issues
+
+User: "retry pipeline"
+AI: Retries failed pipeline with error analysis
+```
+
+### Monitoring
+```
+User: "monitor deployment"
+AI: Starts monitoring deployment progress and reports status
+
+User: "monitor performance"
+AI: Monitors application performance and alerts on issues
+
+User: "monitor errors"
+AI: Monitors error rates and logs for anomalies
+```
+
+### Security
+```
+User: "scan security"
+AI: Runs comprehensive security scan and reports vulnerabilities
+
+User: "update certificates"
+AI: Updates SSL certificates and verifies configuration
+
+User: "audit permissions"
+AI: Audits deployment permissions and reports findings
+```
+
+### Performance
+```
+User: "optimize performance"
+AI: Analyzes and optimizes application performance
+
+User: "load test"
+AI: Runs load testing and reports performance metrics
+
+User: "scale resources"
+AI: Scales deployment resources based on current load
+```
+
+## 🚨 CRITICAL DEPLOYMENT RULES
+
+### Pre-Deployment Checklist
+- [ ] All tests passing
+- [ ] Security scan completed
+- [ ] Configuration validated
+- [ ] Backup created
+- [ ] Monitoring configured
+- [ ] Rollback plan ready
+
+### Production Deployment Rules
+- [ ] Staging deployment successful
+- [ ] Performance testing completed
+- [ ] Security audit passed
+- [ ] Documentation updated
+- [ ] Team notified
+- [ ] Monitoring active
+
+### Post-Deployment Checklist
+- [ ] Functionality verified
+- [ ] Performance monitored
+- [ ] Error rates checked
+- [ ] User feedback collected
+- [ ] Documentation updated
+- [ ] Success metrics recorded
+
+This modular approach provides comprehensive deployment command coverage while maintaining clear organization and easy maintenance of deployment operations.

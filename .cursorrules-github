@@ -1,0 +1,203 @@
+# GitHub Interaction Commands - Cursor IDE Rules
+
+## 🔗 GITHUB COMMAND CATEGORIES
+
+### 📋 Issue Management Commands
+- **`work on issue X`** - Start working on a specific issue
+- **`work on issue X merge`** - Work on issue and auto-merge when complete
+- **`work on issue X with merge`** - Work on issue with merge option
+- **`list issues`** - Show all available issues
+- **`show issue X`** - Display issue details and description
+- **`close issue X`** - Close an issue after completion
+
+### 🌿 Branch Management Commands  
+- **`create branch feature/name`** - Create new feature branch
+- **`create branch bugfix/name`** - Create new bugfix branch
+- **`create branch hotfix/name`** - Create new hotfix branch
+- **`switch to branch name`** - Switch to existing branch
+- **`merge branch name`** - Merge branch to main
+- **`delete branch name`** - Delete local/remote branch
+
+### 🔀 Pull Request Commands
+- **`create pr`** - Create pull request for current branch
+- **`create pr with merge`** - Create PR and merge when ready
+- **`review pr X`** - Review specific pull request
+- **`approve pr X`** - Approve pull request
+- **`merge pr X`** - Merge pull request
+- **`close pr X`** - Close pull request
+
+### 🚀 Workflow Commands
+- **`run workflow name`** - Trigger specific GitHub workflow
+- **`check actions`** - Check GitHub Actions status
+- **`monitor actions`** - Monitor running actions with countdown
+- **`deploy to staging`** - Deploy to staging environment
+- **`deploy to production`** - Deploy to production environment
+
+### 📊 Project Management Commands
+- **`create project board`** - Create new project board
+- **`add to project`** - Add issue/PR to project
+- **`move to column`** - Move item to different project column
+- **`create milestone`** - Create new milestone
+- **`assign milestone`** - Assign milestone to issue/PR
+
+### 🔍 Repository Commands
+- **`clone repo url`** - Clone repository
+- **`fork repo`** - Fork current repository
+- **`sync fork`** - Sync forked repository with upstream
+- **`create repo name`** - Create new repository
+- **`archive repo`** - Archive repository
+
+## 🎯 COMMAND PATTERNS
+
+### Issue Workflow Pattern
+```
+1. work on issue X [merge]
+2. create branch feature/issue-X-description
+3. implement changes
+4. test changes
+5. commit changes
+6. create pr [with merge]
+7. [optional] merge pr
+```
+
+### Branch Management Pattern
+```
+1. create branch [type]/[name]
+2. switch to branch [name]
+3. make changes
+4. commit changes
+5. push branch
+6. create pr
+7. merge pr
+8. delete branch
+```
+
+### Hotfix Pattern
+```
+1. create branch hotfix/[description]
+2. implement fix
+3. test fix
+4. commit fix
+5. create pr
+6. merge pr immediately
+7. deploy fix
+```
+
+## 🚨 CRITICAL GITHUB RULES
+
+### Main Branch Protection
+- **MANDATORY**: Run action monitor before ANY main branch operation
+- **Command**: `monitor actions main 30`
+- **FAIL-SAFE**: If any action fails, DO NOT proceed
+- **VERIFICATION**: All CI/CD pipelines must be green
+
+### Issue Management Rules
+- Always create dedicated branch for each issue
+- Use descriptive branch names: `feature/issue-X-description`
+- Include issue number in commit messages
+- Link PRs to issues with "Resolves #X"
+- Test thoroughly before creating PR
+
+### PR Management Rules
+- Write descriptive PR titles and descriptions
+- Include screenshots for UI changes
+- Request reviews from appropriate team members
+- Ensure all checks pass before merging
+- Use squash merge for clean history
+
+### Branch Naming Conventions
+- **Features**: `feature/issue-X-description`
+- **Bugfixes**: `bugfix/issue-X-description`  
+- **Hotfixes**: `hotfix/issue-X-description`
+- **Experiments**: `experiment/description`
+- **Refactoring**: `refactor/description`
+
+## 🔧 GITHUB CLI INTEGRATION
+
+### Prerequisites
+- GitHub CLI (`gh`) must be installed
+- Must be authenticated with GitHub
+- Repository must be properly configured
+
+### Common Commands
+```bash
+# Issue management
+gh issue list
+gh issue view X
+gh issue create --title "Title" --body "Description"
+gh issue close X
+
+# Branch management  
+gh pr create --title "Title" --body "Description"
+gh pr list
+gh pr view X
+gh pr merge X --squash --delete-branch
+
+# Workflow management
+gh run list
+gh run view X
+gh run watch X
+```
+
+## 📝 COMMAND RESPONSES
+
+### Success Responses
+- ✅ Issue created/updated successfully
+- ✅ Branch created/switched successfully  
+- ✅ PR created/merged successfully
+- ✅ Workflow triggered successfully
+- ✅ Actions completed successfully
+
+### Error Responses
+- ❌ Issue not found or inaccessible
+- ❌ Branch already exists or conflicts
+- ❌ PR cannot be merged (conflicts/checks)
+- ❌ Workflow failed or timed out
+- ❌ Actions failed - check logs
+
+### Warning Responses
+- ⚠️ Branch has uncommitted changes
+- ⚠️ PR has failing checks
+- ⚠️ Actions still running
+- ⚠️ Merge conflicts detected
+- ⚠️ Branch protection rules active
+
+## 🎯 USAGE EXAMPLES
+
+### Working on Issues
+```
+User: "work on issue 5"
+AI: Creates branch, implements solution, creates PR
+
+User: "work on issue 12 merge"  
+AI: Creates branch, implements solution, creates PR, merges when ready
+
+User: "work on issue 3 with merge"
+AI: Creates branch, implements solution, creates PR with merge option
+```
+
+### Branch Management
+```
+User: "create branch feature/user-authentication"
+AI: Creates and switches to new feature branch
+
+User: "merge branch feature/user-authentication"
+AI: Merges branch to main after running action monitor
+
+User: "delete branch feature/user-authentication"
+AI: Deletes local and remote branch after merge
+```
+
+### PR Management
+```
+User: "create pr"
+AI: Creates PR for current branch with descriptive title/body
+
+User: "create pr with merge"
+AI: Creates PR and merges when all checks pass
+
+User: "review pr 15"
+AI: Shows PR details and suggests improvements
+```
+
+This modular approach provides clear, categorized commands for all GitHub interactions while maintaining the comprehensive rules and patterns needed for effective development workflow management.

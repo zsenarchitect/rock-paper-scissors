@@ -1,0 +1,294 @@
+# Project Structure Commands - Cursor IDE Rules
+
+## 📁 PROJECT COMMAND CATEGORIES
+
+### 🏗️ Project Structure Commands
+- **`create project structure`** - Create standard project directory structure
+- **`organize files`** - Organize files according to project structure
+- **`validate structure`** - Validate project structure compliance
+- **`fix structure`** - Fix structural issues and violations
+- **`clean structure`** - Clean up misplaced files and directories
+- **`document structure`** - Generate project structure documentation
+
+### 📂 File Organization Commands
+- **`move file path`** - Move file to correct directory
+- **`organize by type`** - Organize files by file type
+- **`organize by feature`** - Organize files by feature/component
+- **`create directory path`** - Create new directory structure
+- **`cleanup files`** - Clean up temporary and unused files
+- **`archive files`** - Archive old or deprecated files
+
+### 🏷️ Naming Convention Commands
+- **`rename file old new`** - Rename file following conventions
+- **`rename directory old new`** - Rename directory following conventions
+- **`fix naming`** - Fix all naming convention violations
+- **`validate naming`** - Validate naming convention compliance
+- **`generate names`** - Generate names following conventions
+- **`document conventions`** - Document naming conventions
+
+### 🧹 Cleanup Commands
+- **`cleanup debug`** - Remove debug files and logs
+- **`cleanup test`** - Remove test artifacts and temporary files
+- **`cleanup temp`** - Remove temporary files and caches
+- **`cleanup unused`** - Remove unused files and dependencies
+- **`cleanup duplicates`** - Remove duplicate files
+- **`cleanup all`** - Comprehensive cleanup of all categories
+
+### 📋 Documentation Commands
+- **`generate readme`** - Generate project README
+- **`generate docs`** - Generate project documentation
+- **`update docs`** - Update existing documentation
+- **`validate docs`** - Validate documentation completeness
+- **`format docs`** - Format documentation consistently
+- **`publish docs`** - Publish documentation
+
+## 🏗️ PROJECT STRUCTURE STANDARDS
+
+### Root Directory Structure
+```
+/ (root)
+├── README.md                    # Project documentation
+├── .gitignore                   # Git ignore rules
+├── .cursorrules                 # Main cursor rules
+├── .cursorrules-*               # Modular cursor rules
+├── requirements.txt             # Python dependencies
+├── package.json                 # Node.js dependencies
+├── setup.py                     # Python package setup
+├── install.sh                   # Installation script
+├── activate.sh                  # Environment activation
+└── verify-phase1.py            # Phase verification script
+```
+
+### Development Directory Structure
+```
+/ (root)
+├── docs/                        # Documentation
+├── ai_training/                 # AI Training Platform
+├── .venv/                       # Virtual Environment (Hidden)
+├── temp/                        # Temporary files (Git ignored)
+├── DEBUG/                       # Debug files (Git ignored)
+├── scripts/                     # Utility scripts
+└── .github/                     # GitHub workflows and scripts
+```
+
+### File Organization Rules
+- **Root Directory**: Only essential project files
+- **Development Files**: Organized by purpose in subdirectories
+- **Temporary Files**: Stored in `temp/` directory
+- **Debug Files**: Stored in `DEBUG/` directory
+- **Scripts**: Stored in `scripts/` directory
+- **Documentation**: Stored in `docs/` directory
+
+## 🚫 FORBIDDEN IN ROOT DIRECTORY
+
+### File Types Not Allowed
+- Debug files (*.debug, *.log, debug_*)
+- Test files (*.test, test_*, *_test)
+- Temporary files (*.tmp, *.temp, temp_*)
+- Cache files (*.cache, cache_*)
+- Backup files (*.bak, *.backup, backup_*)
+- IDE files (.vscode/, .idea/, *.swp, *.swo)
+- OS files (.DS_Store, Thumbs.db)
+- Build artifacts (dist/, build/, out/)
+
+### Directory Types Not Allowed
+- Test directories in root
+- Debug directories in root
+- Temporary directories in root
+- Cache directories in root
+- Backup directories in root
+- IDE configuration directories
+- OS-specific directories
+
+## ✅ REQUIRED FILE PLACEMENT
+
+### Debug & Test Files
+```
+temp/
+├── debug/                       # Debug files
+├── tests/                       # Test files
+├── logs/                        # Log files
+└── cache/                       # Cache files
+```
+
+### Development Files
+```
+ai_training/
+├── models/                      # AI models
+├── data/                        # Training data
+├── scripts/                     # Training scripts
+└── __init__.py                  # Package init
+```
+
+### Documentation Files
+```
+docs/
+├── README.md                    # Main documentation
+├── API.md                       # API documentation
+├── DEPLOYMENT.md                # Deployment guide
+├── CONTRIBUTING.md              # Contribution guide
+└── assets/                      # Documentation assets
+```
+
+## 🏷️ NAMING CONVENTIONS
+
+### File Naming
+- **HTML/CSS**: kebab-case (`game-ui.css`)
+- **JavaScript**: camelCase (`gameEngine.js`)
+- **Python**: snake_case (`genetic_algorithm.py`)
+- **Classes**: PascalCase (`GameEngine`)
+- **Constants**: UPPER_SNAKE_CASE (`MAX_PLAYERS`)
+
+### Directory Naming
+- **General**: kebab-case (`ai-training/`)
+- **Descriptive**: Clear purpose (`visualization/`)
+- **Consistent**: Follow established patterns
+- **Avoid**: Abbreviations and unclear names
+
+### Command Naming
+- **Actions**: Verb-based (`create`, `generate`, `organize`)
+- **Objects**: Noun-based (`file`, `directory`, `structure`)
+- **Modifiers**: Descriptive (`clean`, `validate`, `fix`)
+
+## 🧹 CLEANUP COMMAND PATTERNS
+
+### Debug Cleanup Workflow
+```
+1. cleanup debug
+2. identify debug files
+3. move to temp/debug/
+4. remove old debug files
+5. clean debug logs
+6. verify cleanup
+```
+
+### Test Cleanup Workflow
+```
+1. cleanup test
+2. identify test artifacts
+3. move to temp/tests/
+4. remove test data
+5. clean test logs
+6. verify cleanup
+```
+
+### General Cleanup Workflow
+```
+1. cleanup all
+2. identify all cleanup categories
+3. organize by type
+4. move to appropriate directories
+5. remove truly unnecessary files
+6. verify structure compliance
+```
+
+## 📋 DOCUMENTATION COMMAND PATTERNS
+
+### README Generation
+```
+1. generate readme
+2. analyze project structure
+3. identify key components
+4. create comprehensive README
+5. include setup instructions
+6. add usage examples
+```
+
+### Documentation Update
+```
+1. update docs
+2. identify outdated sections
+3. update content
+4. verify accuracy
+5. format consistently
+6. validate completeness
+```
+
+## 🎯 COMMAND RESPONSES
+
+### Success Responses
+- ✅ Project structure created successfully
+- ✅ Files organized successfully
+- ✅ Naming conventions fixed
+- ✅ Cleanup completed successfully
+- ✅ Documentation generated successfully
+- ✅ Structure validated successfully
+
+### Error Responses
+- ❌ Structure validation failed
+- ❌ File organization failed
+- ❌ Naming convention violations found
+- ❌ Cleanup failed
+- ❌ Documentation generation failed
+- ❌ Structure compliance issues
+
+### Warning Responses
+- ⚠️ Structure violations detected
+- ⚠️ Files in wrong locations
+- ⚠️ Naming convention issues
+- ⚠️ Cleanup needed
+- ⚠️ Documentation outdated
+- ⚠️ Structure non-compliant
+
+## 🔧 PROJECT TOOLS INTEGRATION
+
+### Structure Validation
+- **Custom Scripts**: Project-specific validation
+- **Linting Tools**: Code and structure linting
+- **Git Hooks**: Pre-commit structure checks
+- **CI/CD**: Automated structure validation
+- **Monitoring**: Continuous structure monitoring
+
+### File Organization
+- **File System**: Native file operations
+- **Git**: Version control integration
+- **Scripts**: Automated organization
+- **Templates**: Structure templates
+- **Validation**: Continuous validation
+
+### Documentation
+- **Markdown**: Documentation format
+- **Generators**: Automated documentation
+- **Templates**: Documentation templates
+- **Validation**: Documentation validation
+- **Publishing**: Documentation publishing
+
+## 📝 USAGE EXAMPLES
+
+### Project Structure
+```
+User: "create project structure"
+AI: Creates standard directory structure with all required folders
+
+User: "organize files"
+AI: Moves files to correct directories based on type and purpose
+
+User: "validate structure"
+AI: Checks structure compliance and reports violations
+```
+
+### File Organization
+```
+User: "move file debug.log to temp/debug/"
+AI: Moves file and updates any references
+
+User: "organize by feature"
+AI: Groups files by feature/component functionality
+
+User: "cleanup files"
+AI: Removes temporary and unused files
+```
+
+### Naming Conventions
+```
+User: "rename file userProfile.js to user-profile.js"
+AI: Renames file and updates all references
+
+User: "fix naming"
+AI: Identifies and fixes all naming convention violations
+
+User: "validate naming"
+AI: Checks naming convention compliance across project
+```
+
+This modular approach provides clear, categorized commands for all project structure management activities while maintaining comprehensive standards and patterns for effective project organization and maintenance.

@@ -1,4 +1,4 @@
-# Rock Paper Scissors Battle Royale - Cursor IDE Rules
+# Rock Paper Scissors Battle Royale - Main Cursor IDE Rules
 
 ## 🤖 AI-HUMAN COLLABORATION FRAMEWORK
 
@@ -38,204 +38,55 @@
 - **Enhanced capabilities**: Advanced AI services and infrastructure
 - **Mutual benefit**: Success for both human and AI collaborators
 
-## 🎯 AI DEVELOPMENT BEST PRACTICES
+## 📚 MODULAR RULES STRUCTURE
 
-### Code Quality Standards
-- **Write production-ready code** from the start
-- **Follow established patterns** and conventions
-- **Implement comprehensive error handling**
-- **Add detailed comments** for complex logic
-- **Optimize for performance** and scalability
+This project uses a modular rules system for better organization and maintainability:
 
-### Project Ownership Mindset
-- **Take ownership** of code quality and architecture
-- **Proactively suggest improvements** and optimizations
-- **Think like a co-founder** in technical decisions
-- **Consider long-term maintainability** in all implementations
-- **Focus on business value** in feature development
+### Core Rule Files
+- **`.cursorrules`** - This main file with high-level overview
+- **`.cursorrules-github`** - GitHub interactions, issues, PRs, branches
+- **`.cursorrules-workflow`** - Workflow automation and branch management  
+- **`.cursorrules-development`** - Code quality, testing, debugging
+- **`.cursorrules-project`** - Project structure, file organization, naming
+- **`.cursorrules-deployment`** - CI/CD, deployment, monitoring
 
-### Collaboration Excellence
-- **Ask clarifying questions** when requirements are ambiguous
-- **Provide multiple solution options** with trade-offs
-- **Document decisions** and reasoning clearly
-- **Suggest innovative approaches** that add value
-- **Maintain consistent communication** about progress
+### Command Categories
+- **GitHub Commands**: Issue management, branch operations, PR management
+- **Workflow Commands**: Automation, monitoring, deployment
+- **Development Commands**: Code generation, testing, debugging
+- **Project Commands**: Structure, organization, cleanup
+- **Deployment Commands**: CI/CD, monitoring, production
 
-### Revenue-Focused Development
-- **Prioritize features** that drive user engagement
-- **Implement monetization hooks** where appropriate
-- **Optimize for user experience** to increase retention
-- **Build scalable architecture** for future growth
-- **Consider business impact** in all technical decisions
+## 🎯 QUICK COMMAND REFERENCE
 
-## 🧹 CLEANUP RULES
-- ALWAYS cleanup debug and test files after use
-- Remove temporary files created during development
-- Clean up console.log statements before committing
-- Remove unused imports and variables
-- Delete test data files after testing
+### GitHub Commands
+- `work on issue X [merge]` - Work on specific issue
+- `create branch [type]/[name]` - Create new branch
+- `create pr [with merge]` - Create pull request
+- `merge pr X` - Merge pull request
+- `monitor actions` - Monitor GitHub Actions
 
-## 📁 FILE ORGANIZATION RULES
-- Keep entry scripts lean and focused
-- Use modular design with clear separation of concerns
-- Do NOT pollute the root folder with unnecessary files
-- Place files in appropriate subdirectories based on purpose
+### Development Commands
+- `generate component name` - Generate new component
+- `run tests [file]` - Run tests
+- `debug [file/function]` - Debug code
+- `analyze code` - Analyze code quality
+- `build project` - Build project
 
-## 🏗️ PROJECT STRUCTURE RULES
+### Project Commands
+- `organize files` - Organize project files
+- `cleanup [type]` - Clean up files
+- `validate structure` - Validate project structure
+- `generate docs` - Generate documentation
+- `fix naming` - Fix naming conventions
 
-### Root Directory - ONLY Essential Files
-```
-/ (root)
-├── README.md                    # Project documentation
-├── .gitignore                   # Git ignore rules
-├── .cursorrules                 # This file
-├── requirements.txt             # Python dependencies
-├── setup.py                     # Python package setup
-├── install.sh                   # Installation script
-├── activate.sh                  # Environment activation
-└── verify-phase1.py            # Phase verification script
-```
+### Workflow Commands
+- `run workflow name` - Trigger workflow
+- `check actions` - Check action status
+- `deploy to [env]` - Deploy to environment
+- `monitor deployment` - Monitor deployment
 
-### Development Files - Organize by Purpose
-```
-/ (root)
-├── docs/                        # GitHub Pages (Production)
-├── ai_training/                 # AI Training Platform
-├── .venv/                       # Virtual Environment (Hidden)
-├── temp/                        # Temporary files (Git ignored)
-└── DEBUG/                       # Debug files (Git ignored)
-```
-
-## 🚫 FORBIDDEN IN ROOT DIRECTORY
-- Debug files (*.debug, *.log, debug_*)
-- Test files (*.test, test_*, *_test)
-- Temporary files (*.tmp, *.temp, temp_*)
-- Cache files (*.cache, cache_*)
-- Backup files (*.bak, *.backup, backup_*)
-- IDE files (.vscode/, .idea/, *.swp, *.swo)
-- OS files (.DS_Store, Thumbs.db)
-- Build artifacts (dist/, build/, out/)
-
-## ✅ REQUIRED FILE PLACEMENT
-
-### Debug & Test Files
-```
-temp/
-├── debug/                       # Debug files
-├── tests/                       # Test files
-├── logs/                        # Log files
-└── cache/                       # Cache files
-```
-
-### Entry Scripts - Keep Lean
-- Main entry points should be minimal
-- Delegate functionality to modules
-- Use clear, descriptive names
-- Include only essential imports
-
-### Modular Design Principles
-- One responsibility per module
-- Clear interfaces between modules
-- Minimal coupling, maximum cohesion
-- Use dependency injection where possible
-
-## 🔧 CURSOR IDE SPECIFIC RULES
-
-### Code Generation
-- Generate code in appropriate subdirectories
-- Use existing module patterns
-- Follow established naming conventions
-- Maintain consistent code style
-
-### File Creation
-- Always check if file belongs in root before creating
-- Use descriptive, purpose-driven names
-- Create necessary parent directories
-- Update .gitignore for new file types
-
-### Refactoring
-- Move misplaced files to correct directories
-- Update imports when moving files
-- Maintain backward compatibility
-- Update documentation for structural changes
-
-## 📝 NAMING CONVENTIONS
-
-### Files
-- Use kebab-case for HTML/CSS: `game-ui.css`
-- Use camelCase for JavaScript: `gameEngine.js`
-- Use snake_case for Python: `genetic_algorithm.py`
-- Use PascalCase for classes: `GameEngine`
-
-### Directories
-- Use kebab-case: `ai-training/`
-- Use descriptive names: `visualization/`
-- Avoid abbreviations: `utils/` not `util/`
-
-## 🧪 TESTING RULES
-
-### Test File Organization
-```
-temp/tests/
-├── unit/                        # Unit tests
-├── integration/                 # Integration tests
-├── e2e/                         # End-to-end tests
-└── fixtures/                    # Test data
-```
-
-### Test Cleanup
-- Remove test files after completion
-- Clean up test data
-- Reset test environment
-- Remove temporary test artifacts
-
-## 🐛 DEBUGGING RULES
-
-### Debug File Management
-```
-DEBUG/
-├── logs/                        # Debug logs
-│   └── action-monitoring/        # GitHub Actions monitoring logs
-├── dumps/                       # Memory dumps
-├── traces/                      # Execution traces
-├── reports/                     # Debug reports
-├── screenshots/                 # Debug screenshots
-├── recordings/                  # Debug recordings
-└── analysis/                    # Debug analysis files
-```
-
-### Debug Features for Better Debugging
-- **Action Monitoring**: Real-time GitHub Actions workflow monitoring with detailed failure logs
-- **Timezone-Aware Filtering**: Monitor only recent workflows (last 10 minutes) to focus on current issues
-- **Smart Exit Logic**: Exits immediately when no workflows are running/queued
-- **Detailed Logging**: Comprehensive logs saved to `DEBUG/logs/action-monitoring/`
-- **Failure Analysis**: Automatic collection of failed workflow logs with run details
-- **Status Summaries**: Clear visual status reports with success/failure counts
-
-### Debug Cleanup
-- Remove debug files after fixing issues
-- Clean up debug logs
-- Remove temporary debug code
-- Reset debug environment
-
-## 📊 LOGGING RULES
-
-### Log File Organization
-```
-temp/logs/
-├── application/                 # Application logs
-├── errors/                      # Error logs
-├── performance/                 # Performance logs
-└── audit/                       # Audit logs
-```
-
-### Log Cleanup
-- Rotate log files regularly
-- Remove old log files
-- Compress archived logs
-- Monitor log file sizes
-
-## 🔄 WORKFLOW RULES
+## 🚨 CRITICAL RULES
 
 ### Main Branch Protection (CRITICAL)
 - **MANDATORY**: Before ANY commit to main branch, run `./.github/_local_action_monitor main`
@@ -258,104 +109,25 @@ temp/logs/
   - `./.github/_local_action_monitor` - Monitor main branch for up to 60 minutes (default)
   - `./.github/scripts/quick-check.sh` - Quick status check without waiting
 
-### Before Committing
-1. Run local action monitor to check workflow status
-2. Run cleanup script
-3. Remove temporary files
-4. Clean up debug code
-5. Update documentation
-6. Run verification tests
+## 🔧 INTEGRATION NOTES
 
-### Main Branch Protection Rules
-- **ALWAYS run local action monitor** before committing to main branch
-- **ALWAYS run local action monitor** before merging PRs to main branch
-- **MANDATORY**: Use `./.github/_local_action_monitor main [max-wait-minutes]` to ensure all actions are passing
-- **FAIL-SAFE**: If any action fails, DO NOT commit/merge until all issues are resolved
-- **MONITORING**: Wait for ALL workflows to complete (success or failure) before proceeding
-- **VERIFICATION**: Confirm all CI/CD pipelines are green before main branch operations
+### Command Processing
+- All commands are processed through the modular rule system
+- Commands are categorized and routed to appropriate rule files
+- Responses follow consistent patterns across all modules
+- Error handling is standardized across all command types
 
-### After Testing
-1. Remove test artifacts
-2. Clean up test data
-3. Reset test environment
-4. Update test documentation
+### Rule Updates
+- Individual rule files can be updated independently
+- Main rules file provides overview and integration
+- Changes are automatically reflected in command processing
+- Version control tracks all rule changes
 
-### After Debugging
-1. Remove debug files
-2. Clean up debug logs
-3. Remove temporary code
-4. Document fixes
+### Best Practices
+- Use specific, descriptive commands
+- Follow established command patterns
+- Check command responses for success/error status
+- Use appropriate command categories for different tasks
+- Follow critical rules for main branch operations
 
-## 🚀 DEPLOYMENT RULES
-
-### Production Build
-- Exclude debug files
-- Remove test files
-- Clean up temporary files
-- Optimize for production
-
-### Development Build
-- Include necessary debug tools
-- Keep test files accessible
-- Maintain development environment
-- Document development setup
-
-## 📋 MAINTENANCE RULES
-
-### Regular Cleanup
-- Weekly: Remove old temporary files
-- Monthly: Clean up debug artifacts
-- Quarterly: Review file organization
-- Annually: Refactor if needed
-
-### File Monitoring
-- Monitor root directory for pollution
-- Check for misplaced files
-- Verify proper organization
-- Update rules as needed
-
-## 🎯 QUALITY GATES
-
-### Before Merge
-- All temporary files removed
-- Debug code cleaned up
-- Files in correct directories
-- Documentation updated
-
-### Before Release
-- Production build clean
-- No debug artifacts
-- Proper file organization
-- All tests passing
-
-## 📚 DOCUMENTATION RULES
-
-### Keep Updated
-- Update README for structural changes
-- Document new file organization
-- Maintain architecture documentation
-- Keep rules current
-
-### File Documentation
-- Document file purposes
-- Explain directory structures
-- Maintain change logs
-- Keep documentation clean
-
----
-
-## 🚨 VIOLATION HANDLING
-
-### Immediate Actions
-1. Move misplaced files to correct directories
-2. Remove temporary files
-3. Clean up debug artifacts
-4. Update .gitignore if needed
-
-### Prevention
-1. Use file templates
-2. Follow naming conventions
-3. Regular cleanup checks
-4. Automated cleanup scripts
-
-Remember: Clean code is maintainable code. Keep the project organized and professional! 🎮
+This modular approach provides comprehensive command coverage while maintaining clear organization and easy maintenance of the rules system.
