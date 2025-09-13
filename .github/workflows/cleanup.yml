@@ -102,7 +102,7 @@ jobs:
         echo "✅ Cleanup report generated" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Upload cleanup reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: cleanup-reports
@@ -309,7 +309,7 @@ jobs:
         echo "Scheduled for next Sunday at 1 AM UTC" >> cleanup-report.md
         
     - name: 📊 Upload cleanup report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: cleanup-report
         path: cleanup-report.md

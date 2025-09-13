@@ -59,7 +59,7 @@ jobs:
         echo "✅ Frontend tests completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Upload frontend reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: frontend-reports
@@ -131,7 +131,7 @@ jobs:
         echo "✅ Python tests completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Upload backend reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: backend-reports
@@ -217,7 +217,7 @@ jobs:
         echo "✅ Neural network tested" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Upload AI test reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: ai-training-reports
@@ -267,7 +267,7 @@ jobs:
         fi
         
     - name: 📊 Upload structure validation reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: structure-validation-reports
@@ -307,7 +307,7 @@ jobs:
         echo "✅ Security scan completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Upload security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-reports
@@ -385,7 +385,7 @@ jobs:
         echo "✅ Memory usage test completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Upload performance reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: performance-reports
@@ -437,7 +437,7 @@ jobs:
         echo "✅ Python modules packaged" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: build-artifacts
         path: |
@@ -538,7 +538,7 @@ jobs:
         echo "- **Total Size:** $(du -sh ./artifacts | cut -f1)" >> ci-summary-report.md
         
     - name: 📊 Upload comprehensive summary
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ci-summary-report
         path: |

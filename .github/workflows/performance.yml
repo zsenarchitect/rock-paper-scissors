@@ -132,7 +132,7 @@ jobs:
         echo "✅ Performance analysis completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Upload performance reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: frontend-performance-reports
@@ -223,7 +223,7 @@ jobs:
         " > memory-profile.txt || true
         
     - name: 📊 Upload performance data
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: backend-performance
         path: memory-profile.txt
@@ -455,7 +455,7 @@ jobs:
         echo "4. Consider caching strategies" >> performance-analysis.md
         
     - name: 📊 Upload performance analysis
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: performance-analysis
         path: performance-analysis.md
