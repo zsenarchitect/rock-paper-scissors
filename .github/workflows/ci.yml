@@ -1,0 +1,322 @@
+name: 🧪 Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+  RUST_VERSION: '1.70'
+
+jobs:
+  # Frontend Testing (JavaScript/TypeScript)
+  frontend-test:
+    name: 🎨 Frontend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📥 Install dependencies
+      run: |
+        cd docs
+        npm init -y
+        npm install --save-dev jest @testing-library/jest-dom @testing-library/dom
+        npm install --save-dev eslint prettier
+        
+    - name: 🔍 Lint JavaScript
+      run: |
+        cd docs
+        npx eslint js/**/*.js --format=stylish || true
+        
+    - name: 🎨 Format check
+      run: |
+        cd docs
+        npx prettier --check js/**/*.js css/**/*.css || true
+        
+    - name: 🧪 Run frontend tests
+      run: |
+        cd docs
+        npx jest --testPathPattern=js --passWithNoTests
+        
+    - name: 🌐 Test HTML structure
+      run: |
+        cd docs
+        python3 -m http.server 8000 &
+        sleep 5
+        curl -f http://localhost:8000 || exit 1
+        pkill -f "python3 -m http.server"
+
+  # Backend Testing (Python)
+  backend-test:
+    name: 🐍 Backend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📥 Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: 📦 Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 🔍 Lint Python code
+      run: |
+        flake8 ai_training/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        black --check ai_training/ || true
+        mypy ai_training/ --ignore-missing-imports || true
+        
+    - name: 🧪 Run Python tests
+      run: |
+        python -m pytest ai_training/ -v --cov=ai_training --cov-report=xml
+        
+    - name: 📊 Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: backend
+        name: backend-coverage
+
+  # AI Training Tests
+  ai-training-test:
+    name: 🤖 AI Training Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install AI dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 🧪 Test AI training modules
+      run: |
+        python ai_training/scripts/train_model.py --test-mode
+        
+    - name: 📊 Test genetic algorithm
+      run: |
+        python -c "
+        import sys
+        sys.path.append('.')
+        from ai_training.models.genetic_algorithm import GeneticAlgorithm
+        ga = GeneticAlgorithm()
+        print('✅ Genetic Algorithm import successful')
+        "
+        
+    - name: 🧠 Test neural network
+      run: |
+        python -c "
+        import sys
+        sys.path.append('.')
+        from ai_training.models.neural_network import NeuralNetwork
+        nn = NeuralNetwork()
+        print('✅ Neural Network import successful')
+        "
+
+  # Project Structure Validation
+  structure-validation:
+    name: 🏗️ Structure Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 🧹 Run cleanup script
+      run: |
+        chmod +x cleanup.sh
+        ./cleanup.sh
+        
+    - name: ✅ Validate project structure
+      run: |
+        python validate-structure.py
+        
+    - name: 🔍 Check for debug files in root
+      run: |
+        if [ -n "$(find . -maxdepth 1 -name 'debug_*' -o -name '*.debug' -o -name 'test_*' -o -name '*_test')" ]; then
+          echo "❌ Debug/test files found in root directory"
+          find . -maxdepth 1 -name 'debug_*' -o -name '*.debug' -o -name 'test_*' -o -name '*_test'
+          exit 1
+        else
+          echo "✅ Root directory is clean"
+        fi
+
+  # Security Scanning
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 🔍 Run security scan
+      run: |
+        pip install safety bandit
+        safety check -r requirements.txt
+        bandit -r ai_training/ -f json -o bandit-report.json || true
+        
+    - name: 📊 Upload security report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-report
+        path: bandit-report.json
+
+  # Performance Testing
+  performance-test:
+    name: ⚡ Performance Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: ⚡ Run performance tests
+      run: |
+        python verify-phase1.py --performance-test
+        
+    - name: 📊 Memory usage test
+      run: |
+        python -c "
+        import psutil
+        import sys
+        sys.path.append('.')
+        from ai_training.models.genetic_algorithm import GeneticAlgorithm
+        
+        # Test memory usage
+        ga = GeneticAlgorithm()
+        memory_before = psutil.Process().memory_info().rss / 1024 / 1024
+        print(f'Memory before: {memory_before:.2f} MB')
+        
+        # Run some operations
+        for i in range(100):
+            ga.evolve()
+            
+        memory_after = psutil.Process().memory_info().rss / 1024 / 1024
+        print(f'Memory after: {memory_after:.2f} MB')
+        print(f'Memory increase: {memory_after - memory_before:.2f} MB')
+        "
+
+  # Build and Package
+  build:
+    name: 📦 Build & Package
+    runs-on: ubuntu-latest
+    needs: [frontend-test, backend-test, ai-training-test, structure-validation]
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 🏗️ Build frontend
+      run: |
+        cd docs
+        # Create production build
+        mkdir -p dist
+        cp -r js css assets data index.html dist/
+        echo "Frontend build completed"
+        
+    - name: 📦 Package Python modules
+      run: |
+        python setup.py sdist bdist_wheel
+        
+    - name: 📊 Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: |
+          docs/dist/
+          dist/
+        retention-days: 7
+
+  # Notify on completion
+  notify:
+    name: 📢 Notify
+    runs-on: ubuntu-latest
+    needs: [build, security-scan, performance-test]
+    if: always()
+    
+    steps:
+    - name: ✅ Success notification
+      if: ${{ needs.build.result == 'success' }}
+      run: |
+        echo "🎉 All CI checks passed successfully!"
+        echo "✅ Frontend tests: ${{ needs.frontend-test.result }}"
+        echo "✅ Backend tests: ${{ needs.backend-test.result }}"
+        echo "✅ AI training tests: ${{ needs.ai-training-test.result }}"
+        echo "✅ Structure validation: ${{ needs.structure-validation.result }}"
+        echo "✅ Security scan: ${{ needs.security-scan.result }}"
+        echo "✅ Performance test: ${{ needs.performance-test.result }}"
+        
+    - name: ❌ Failure notification
+      if: ${{ needs.build.result == 'failure' }}
+      run: |
+        echo "❌ CI checks failed!"
+        echo "Check the logs for details."
+        exit 1

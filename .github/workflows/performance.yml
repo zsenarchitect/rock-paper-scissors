@@ -1,0 +1,408 @@
+name: ⚡ Performance Testing & Monitoring
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 3 * * 0'  # Weekly on Sunday at 3 AM
+  workflow_dispatch:
+    inputs:
+      test-type:
+        description: 'Type of performance test'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - frontend
+        - backend
+        - ai-training
+        - memory
+        - load
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Frontend performance testing
+  frontend-performance:
+    name: 🎨 Frontend Performance
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test-type == 'all' || github.event.inputs.test-type == 'frontend'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        cd docs
+        npm init -y
+        npm install --save-dev lighthouse puppeteer
+        
+    - name: 🌐 Start local server
+      run: |
+        cd docs
+        python3 -m http.server 8000 &
+        sleep 5
+        
+    - name: ⚡ Run Lighthouse performance test
+      run: |
+        cd docs
+        npx lighthouse http://localhost:8000 --output=json --output-path=lighthouse-report.json --chrome-flags="--headless"
+        
+    - name: 📊 Analyze performance metrics
+      run: |
+        python3 -c "
+        import json
+        with open('docs/lighthouse-report.json', 'r') as f:
+            report = json.load(f)
+        
+        scores = report['categories']
+        print('🎯 Performance Scores:')
+        for category, data in scores.items():
+            score = data['score'] * 100
+            print(f'  {category}: {score:.1f}/100')
+            
+        # Check if performance is acceptable
+        performance_score = scores['performance']['score'] * 100
+        if performance_score < 50:
+            print('❌ Performance score too low!')
+            exit(1)
+        else:
+            print('✅ Performance score acceptable')
+        "
+        
+    - name: 📊 Upload performance report
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-performance
+        path: docs/lighthouse-report.json
+        retention-days: 30
+
+  # Backend performance testing
+  backend-performance:
+    name: 🐍 Backend Performance
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test-type == 'all' || github.event.inputs.test-type == 'backend'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install psutil memory-profiler line-profiler
+        
+    - name: ⚡ Run backend performance tests
+      run: |
+        python -c "
+        import time
+        import psutil
+        import sys
+        sys.path.append('.')
+        
+        # Test AI training performance
+        from ai_training.models.genetic_algorithm import GeneticAlgorithm
+        
+        start_time = time.time()
+        start_memory = psutil.Process().memory_info().rss / 1024 / 1024
+        
+        ga = GeneticAlgorithm()
+        for i in range(100):
+            ga.evolve()
+            
+        end_time = time.time()
+        end_memory = psutil.Process().memory_info().rss / 1024 / 1024
+        
+        execution_time = end_time - start_time
+        memory_usage = end_memory - start_memory
+        
+        print(f'⏱️ Execution time: {execution_time:.2f} seconds')
+        print(f'💾 Memory usage: {memory_usage:.2f} MB')
+        
+        # Performance thresholds
+        if execution_time > 10:
+            print('❌ Execution time too slow!')
+            sys.exit(1)
+        else:
+            print('✅ Execution time acceptable')
+            
+        if memory_usage > 100:
+            print('❌ Memory usage too high!')
+            sys.exit(1)
+        else:
+            print('✅ Memory usage acceptable')
+        "
+        
+    - name: 📊 Memory profiling
+      run: |
+        python -c "
+        from memory_profiler import profile
+        import sys
+        sys.path.append('.')
+        
+        @profile
+        def test_memory():
+            from ai_training.models.neural_network import NeuralNetwork
+            nn = NeuralNetwork()
+            for i in range(50):
+                nn.forward([0.1, 0.2, 0.3])
+            return nn
+            
+        test_memory()
+        " > memory-profile.txt || true
+        
+    - name: 📊 Upload performance data
+      uses: actions/upload-artifact@v3
+      with:
+        name: backend-performance
+        path: memory-profile.txt
+        retention-days: 30
+
+  # AI Training performance
+  ai-performance:
+    name: 🤖 AI Training Performance
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test-type == 'all' || github.event.inputs.test-type == 'ai-training'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: ⚡ Test AI training performance
+      run: |
+        python ai_training/scripts/train_model.py --performance-test --iterations=100
+        
+    - name: 📊 Benchmark AI algorithms
+      run: |
+        python -c "
+        import time
+        import sys
+        sys.path.append('.')
+        
+        # Benchmark genetic algorithm
+        from ai_training.models.genetic_algorithm import GeneticAlgorithm
+        
+        print('🧬 Genetic Algorithm Benchmark:')
+        start = time.time()
+        ga = GeneticAlgorithm()
+        for i in range(1000):
+            ga.evolve()
+        ga_time = time.time() - start
+        print(f'  1000 iterations: {ga_time:.2f}s')
+        
+        # Benchmark neural network
+        from ai_training.models.neural_network import NeuralNetwork
+        
+        print('🧠 Neural Network Benchmark:')
+        start = time.time()
+        nn = NeuralNetwork()
+        for i in range(1000):
+            nn.forward([0.1, 0.2, 0.3])
+        nn_time = time.time() - start
+        print(f'  1000 forward passes: {nn_time:.2f}s')
+        
+        # Performance thresholds
+        if ga_time > 5:
+            print('❌ GA too slow!')
+            sys.exit(1)
+        if nn_time > 1:
+            print('❌ NN too slow!')
+            sys.exit(1)
+            
+        print('✅ AI performance acceptable')
+        "
+
+  # Memory usage testing
+  memory-test:
+    name: 💾 Memory Testing
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test-type == 'all' || github.event.inputs.test-type == 'memory'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install memory-profiler psutil
+        
+    - name: 💾 Test memory usage patterns
+      run: |
+        python -c "
+        import psutil
+        import gc
+        import sys
+        sys.path.append('.')
+        
+        def test_memory_leaks():
+            from ai_training.models.genetic_algorithm import GeneticAlgorithm
+            from ai_training.models.neural_network import NeuralNetwork
+            
+            initial_memory = psutil.Process().memory_info().rss / 1024 / 1024
+            print(f'Initial memory: {initial_memory:.2f} MB')
+            
+            # Create and destroy objects multiple times
+            for cycle in range(10):
+                ga = GeneticAlgorithm()
+                nn = NeuralNetwork()
+                
+                # Use objects
+                for i in range(100):
+                    ga.evolve()
+                    nn.forward([0.1, 0.2, 0.3])
+                
+                # Delete objects
+                del ga, nn
+                gc.collect()
+                
+                current_memory = psutil.Process().memory_info().rss / 1024 / 1024
+                print(f'Cycle {cycle + 1} memory: {current_memory:.2f} MB')
+            
+            final_memory = psutil.Process().memory_info().rss / 1024 / 1024
+            memory_increase = final_memory - initial_memory
+            
+            print(f'Final memory: {final_memory:.2f} MB')
+            print(f'Memory increase: {memory_increase:.2f} MB')
+            
+            if memory_increase > 50:
+                print('❌ Potential memory leak detected!')
+                sys.exit(1)
+            else:
+                print('✅ No memory leaks detected')
+        
+        test_memory_leaks()
+        "
+
+  # Load testing
+  load-test:
+    name: 🔥 Load Testing
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test-type == 'all' || github.event.inputs.test-type == 'load'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install load testing tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install locust requests
+        
+    - name: 🔥 Run load tests
+      run: |
+        # Start the application
+        cd docs
+        python3 -m http.server 8000 &
+        sleep 5
+        
+        # Run load test
+        python -c "
+        import requests
+        import time
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+        
+        def make_request():
+            try:
+                response = requests.get('http://localhost:8000', timeout=5)
+                return response.status_code == 200
+            except:
+                return False
+        
+        # Test concurrent requests
+        print('🔥 Load Testing:')
+        start_time = time.time()
+        
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(make_request) for _ in range(100)]
+            results = [f.result() for f in futures]
+        
+        end_time = time.time()
+        success_rate = sum(results) / len(results) * 100
+        total_time = end_time - start_time
+        
+        print(f'  Requests: 100')
+        print(f'  Success rate: {success_rate:.1f}%')
+        print(f'  Total time: {total_time:.2f}s')
+        print(f'  RPS: {100/total_time:.1f}')
+        
+        if success_rate < 95:
+            print('❌ Load test failed!')
+            exit(1)
+        else:
+            print('✅ Load test passed!')
+        "
+
+  # Performance regression detection
+  performance-regression:
+    name: 📈 Performance Regression
+    runs-on: ubuntu-latest
+    needs: [frontend-performance, backend-performance, ai-performance, memory-test, load-test]
+    if: always()
+    
+    steps:
+    - name: 📥 Download performance artifacts
+      uses: actions/download-artifact@v3
+      
+    - name: 📈 Analyze performance trends
+      run: |
+        echo "# ⚡ Performance Analysis" > performance-analysis.md
+        echo "" >> performance-analysis.md
+        echo "## Test Results" >> performance-analysis.md
+        echo "- Frontend Performance: ${{ needs.frontend-performance.result }}" >> performance-analysis.md
+        echo "- Backend Performance: ${{ needs.backend-performance.result }}" >> performance-analysis.md
+        echo "- AI Performance: ${{ needs.ai-performance.result }}" >> performance-analysis.md
+        echo "- Memory Test: ${{ needs.memory-test.result }}" >> performance-analysis.md
+        echo "- Load Test: ${{ needs.load-test.result }}" >> performance-analysis.md
+        echo "" >> performance-analysis.md
+        echo "## Recommendations" >> performance-analysis.md
+        echo "1. Monitor performance metrics over time" >> performance-analysis.md
+        echo "2. Set up performance alerts" >> performance-analysis.md
+        echo "3. Optimize slow components" >> performance-analysis.md
+        echo "4. Consider caching strategies" >> performance-analysis.md
+        
+    - name: 📊 Upload performance analysis
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-analysis
+        path: performance-analysis.md
+        retention-days: 30

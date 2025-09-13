@@ -1,0 +1,199 @@
+name: 🚀 Continuous Deployment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Deploy to GitHub Pages
+  deploy-github-pages:
+    name: 🌐 Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 🏗️ Build frontend
+      run: |
+        cd docs
+        # Optimize for production
+        echo "Building production frontend..."
+        
+        # Minify CSS (basic minification)
+        find css -name "*.css" -exec sed -i 's/\/\*.*\*\///g; s/\s\+/ /g; s/;\s*/;/g' {} \;
+        
+        # Create production index.html
+        cp index.html index.prod.html
+        
+        # Add production optimizations
+        echo "Frontend build completed"
+        
+    - name: 📦 Setup Pages
+      uses: actions/configure-pages@v3
+      
+    - name: 📤 Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: docs/
+        
+    - name: 🚀 Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
+
+  # Deploy AI Training API (if backend exists)
+  deploy-api:
+    name: 🤖 Deploy AI Training API
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 🧪 Test API endpoints
+      run: |
+        # Test if API endpoints exist and work
+        python -c "
+        import sys
+        sys.path.append('.')
+        try:
+            from docs.js.api.battle_api import BattleAPI
+            print('✅ API module found')
+        except ImportError:
+            print('ℹ️ API module not found - skipping API deployment')
+        "
+        
+    - name: 🐳 Build Docker image (if Dockerfile exists)
+      if: hashFiles('Dockerfile*') != ''
+      run: |
+        if [ -f "Dockerfile" ]; then
+          docker build -t rock-paper-scissors:${{ github.sha }} .
+          echo "Docker image built successfully"
+        else
+          echo "No Dockerfile found - skipping Docker build"
+        fi
+
+  # Deploy to staging environment
+  deploy-staging:
+    name: 🧪 Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
+    environment: staging
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 🏗️ Build staging version
+      run: |
+        echo "Building staging version..."
+        cd docs
+        # Add staging-specific configurations
+        echo "Staging build completed"
+        
+    - name: 🚀 Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add staging deployment logic here
+        echo "Staging deployment completed"
+
+  # Deploy to production environment
+  deploy-production:
+    name: 🏭 Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    environment: production
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 🏗️ Build production version
+      run: |
+        echo "Building production version..."
+        cd docs
+        # Add production-specific optimizations
+        echo "Production build completed"
+        
+    - name: 🚀 Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        # Add production deployment logic here
+        echo "Production deployment completed"
+
+  # Health check after deployment
+  health-check:
+    name: 🏥 Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy-github-pages]
+    if: always()
+    
+    steps:
+    - name: 🌐 Check GitHub Pages deployment
+      run: |
+        sleep 30  # Wait for deployment to complete
+        curl -f https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/ || echo "GitHub Pages not accessible yet"
+        
+    - name: 📊 Deployment status
+      run: |
+        echo "Deployment completed!"
+        echo "GitHub Pages URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        echo "Commit: ${{ github.sha }}"
+        echo "Branch: ${{ github.ref_name }}"

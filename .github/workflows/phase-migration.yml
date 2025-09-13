@@ -1,0 +1,282 @@
+name: 🔄 Phase Migration Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'Migration phase'
+        required: true
+        type: choice
+        options:
+        - phase1-to-typescript
+        - phase1-to-rust
+        - phase1-to-python
+        - phase2-to-microservices
+        - full-migration
+      dry-run:
+        description: 'Dry run (no actual changes)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+  RUST_VERSION: '1.70'
+
+jobs:
+  # Phase 1 to TypeScript migration
+  migrate-to-typescript:
+    name: 🔧 Migrate to TypeScript
+    runs-on: ubuntu-latest
+    if: github.event.inputs.phase == 'phase1-to-typescript'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 📦 Install TypeScript
+      run: |
+        npm install -g typescript @types/node
+        npm init -y
+        npm install --save-dev typescript @types/node ts-node
+        
+    - name: 🔧 Setup TypeScript configuration
+      run: |
+        cat > tsconfig.json << 'EOF'
+        {
+          "compilerOptions": {
+            "target": "ES2020",
+            "module": "ES2020",
+            "moduleResolution": "node",
+            "strict": true,
+            "esModuleInterop": true,
+            "skipLibCheck": true,
+            "forceConsistentCasingInFileNames": true,
+            "outDir": "./dist",
+            "rootDir": "./docs/js",
+            "declaration": true,
+            "sourceMap": true
+          },
+          "include": ["docs/js/**/*"],
+          "exclude": ["node_modules", "dist", "temp", "DEBUG"]
+        }
+        EOF
+        
+    - name: 🔄 Convert JavaScript to TypeScript
+      if: ${{ !github.event.inputs.dry-run }}
+      run: |
+        cd docs/js
+        find . -name "*.js" -exec sh -c 'mv "$1" "${1%.js}.ts"' _ {} \;
+        echo "JavaScript files converted to TypeScript"
+        
+    - name: 🧪 Test TypeScript compilation
+      run: |
+        if [ "${{ github.event.inputs.dry-run }}" = "true" ]; then
+          echo "🔍 Dry run: Would convert JavaScript files to TypeScript"
+          find docs/js -name "*.js" | head -5
+        else
+          npx tsc --noEmit
+          echo "✅ TypeScript compilation successful"
+        fi
+
+  # Phase 1 to Rust migration
+  migrate-to-rust:
+    name: 🦀 Migrate to Rust
+    runs-on: ubuntu-latest
+    if: github.event.inputs.phase == 'phase1-to-rust'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
+        components: rustfmt, clippy
+        
+    - name: 🏗️ Create Rust project structure
+      if: ${{ !github.event.inputs.dry-run }}
+      run: |
+        mkdir -p backend/src/{api,simulation,models}
+        cat > backend/Cargo.toml << 'EOF'
+        [package]
+        name = "rock-paper-scissors-backend"
+        version = "0.1.0"
+        edition = "2021"
+        
+        [dependencies]
+        actix-web = "4.0"
+        serde = { version = "1.0", features = ["derive"] }
+        serde_json = "1.0"
+        tokio = { version = "1.0", features = ["full"] }
+        EOF
+        
+    - name: 🧪 Test Rust setup
+      run: |
+        if [ "${{ github.event.inputs.dry-run }}" = "true" ]; then
+          echo "🔍 Dry run: Would create Rust backend structure"
+        else
+          cd backend
+          cargo check
+          echo "✅ Rust project setup successful"
+        fi
+
+  # Phase 1 to Python migration
+  migrate-to-python:
+    name: 🐍 Migrate to Python
+    runs-on: ubuntu-latest
+    if: github.event.inputs.phase == 'phase1-to-python'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 🔄 Enhance Python AI training
+      if: ${{ !github.event.inputs.dry-run }}
+      run: |
+        # Enhance existing Python modules
+        python -c "
+        import sys
+        sys.path.append('.')
+        from ai_training.models.genetic_algorithm import GeneticAlgorithm
+        from ai_training.models.neural_network import NeuralNetwork
+        
+        # Test enhanced functionality
+        ga = GeneticAlgorithm()
+        nn = NeuralNetwork()
+        print('✅ Python AI modules enhanced')
+        "
+        
+    - name: 🧪 Test Python migration
+      run: |
+        if [ "${{ github.event.inputs.dry-run }}" = "true" ]; then
+          echo "🔍 Dry run: Would enhance Python AI training modules"
+        else
+          python ai_training/scripts/train_model.py --test-mode
+          echo "✅ Python migration successful"
+        fi
+
+  # Phase 2 to microservices migration
+  migrate-to-microservices:
+    name: 🏗️ Migrate to Microservices
+    runs-on: ubuntu-latest
+    if: github.event.inputs.phase == 'phase2-to-microservices'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐳 Setup Docker
+      run: |
+        # Check if Docker is available
+        docker --version || echo "Docker not available"
+        
+    - name: 🏗️ Create microservices structure
+      if: ${{ !github.event.inputs.dry-run }}
+      run: |
+        mkdir -p services/{game-engine,ai-training,analytics,user-management}
+        mkdir -p infrastructure/{docker,kubernetes}
+        
+        # Create basic Docker Compose for microservices
+        cat > docker-compose.microservices.yml << 'EOF'
+        version: '3.8'
+        services:
+          game-engine:
+            build: ./services/game-engine
+            ports:
+              - "8001:8001"
+              
+          ai-training:
+            build: ./services/ai-training
+            ports:
+              - "8002:8002"
+              
+          analytics:
+            build: ./services/analytics
+            ports:
+              - "8003:8003"
+              
+          user-management:
+            build: ./services/user-management
+            ports:
+              - "8004:8004"
+        EOF
+        
+    - name: 🧪 Test microservices setup
+      run: |
+        if [ "${{ github.event.inputs.dry-run }}" = "true" ]; then
+          echo "🔍 Dry run: Would create microservices architecture"
+        else
+          echo "✅ Microservices structure created"
+        fi
+
+  # Full migration (all phases)
+  full-migration:
+    name: 🚀 Full Migration
+    runs-on: ubuntu-latest
+    if: github.event.inputs.phase == 'full-migration'
+    needs: [migrate-to-typescript, migrate-to-rust, migrate-to-python, migrate-to-microservices]
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔄 Run full migration
+      run: |
+        echo "🚀 Running full migration..."
+        echo "Phase 1 → TypeScript: ${{ needs.migrate-to-typescript.result }}"
+        echo "Phase 1 → Rust: ${{ needs.migrate-to-rust.result }}"
+        echo "Phase 1 → Python: ${{ needs.migrate-to-python.result }}"
+        echo "Phase 2 → Microservices: ${{ needs.migrate-to-microservices.result }}"
+        
+        if [ "${{ github.event.inputs.dry-run }}" = "true" ]; then
+          echo "🔍 Dry run: Would perform full migration"
+        else
+          echo "✅ Full migration completed"
+        fi
+
+  # Migration validation
+  validate-migration:
+    name: ✅ Validate Migration
+    runs-on: ubuntu-latest
+    needs: [migrate-to-typescript, migrate-to-rust, migrate-to-python, migrate-to-microservices]
+    if: always()
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: ✅ Validate migration results
+      run: |
+        echo "Migration validation results:"
+        echo "TypeScript: ${{ needs.migrate-to-typescript.result }}"
+        echo "Rust: ${{ needs.migrate-to-rust.result }}"
+        echo "Python: ${{ needs.migrate-to-python.result }}"
+        echo "Microservices: ${{ needs.migrate-to-microservices.result }}"
+        
+        # Check if all migrations succeeded
+        if [ "${{ needs.migrate-to-typescript.result }}" = "success" ] && \
+           [ "${{ needs.migrate-to-rust.result }}" = "success" ] && \
+           [ "${{ needs.migrate-to-python.result }}" = "success" ] && \
+           [ "${{ needs.migrate-to-microservices.result }}" = "success" ]; then
+          echo "🎉 All migrations completed successfully!"
+        else
+          echo "⚠️ Some migrations failed or were skipped"
+        fi

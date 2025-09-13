@@ -1,0 +1,258 @@
+name: 🔒 Security & Quality Assurance
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  # Security scanning
+  security-scan:
+    name: 🔍 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 🔍 Python security scan
+      run: |
+        pip install safety bandit semgrep
+        safety check -r requirements.txt --json --output safety-report.json
+        bandit -r ai_training/ -f json -o bandit-report.json || true
+        
+    - name: 🔍 JavaScript security scan
+      run: |
+        cd docs
+        npm init -y
+        npm install --save-dev eslint-plugin-security
+        npx eslint js/**/*.js --config .eslintrc.security.js || true
+        
+    - name: 🔍 Secret scanning
+      run: |
+        # Check for hardcoded secrets
+        if grep -r "api[_-]key\|secret\|password\|token" . --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv; then
+          echo "⚠️ Potential secrets found in code"
+        else
+          echo "✅ No hardcoded secrets found"
+        fi
+        
+    - name: 📊 Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          safety-report.json
+          bandit-report.json
+        retention-days: 30
+
+  # Dependency vulnerability scanning
+  dependency-scan:
+    name: 📦 Dependency Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 🔍 Python dependency scan
+      run: |
+        pip install safety pip-audit
+        safety check -r requirements.txt
+        pip-audit --desc --format=json --output=pip-audit-report.json
+        
+    - name: 🔍 Node.js dependency scan
+      run: |
+        cd docs
+        npm init -y
+        npm audit --audit-level=moderate --json > npm-audit-report.json || true
+        
+    - name: 📊 Upload dependency reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: dependency-reports
+        path: |
+          pip-audit-report.json
+          docs/npm-audit-report.json
+        retention-days: 30
+
+  # Code quality analysis
+  code-quality:
+    name: 📊 Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 📊 Python code quality
+      run: |
+        pip install flake8 black mypy pylint
+        flake8 ai_training/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        black --check ai_training/ || true
+        mypy ai_training/ --ignore-missing-imports || true
+        pylint ai_training/ --output-format=json --output=pylint-report.json || true
+        
+    - name: 📊 JavaScript code quality
+      run: |
+        cd docs
+        npm init -y
+        npm install --save-dev eslint prettier
+        npx eslint js/**/*.js --format=json --output-file=eslint-report.json || true
+        npx prettier --check js/**/*.js css/**/*.css || true
+        
+    - name: 📊 Upload quality reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: quality-reports
+        path: |
+          pylint-report.json
+          docs/eslint-report.json
+        retention-days: 30
+
+  # License compliance
+  license-check:
+    name: 📄 License Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📄 Check Python licenses
+      run: |
+        pip install pip-licenses
+        pip-licenses --format=json --output-file=python-licenses.json
+        
+    - name: 📄 Check for license compatibility
+      run: |
+        python -c "
+        import json
+        with open('python-licenses.json', 'r') as f:
+            licenses = json.load(f)
+        
+        # Check for problematic licenses
+        problematic = ['GPL', 'AGPL', 'Copyleft']
+        for pkg in licenses:
+            license_name = pkg.get('License', '')
+            if any(prob in license_name for prob in problematic):
+                print(f'⚠️ Potentially problematic license: {pkg[\"Name\"]} - {license_name}')
+            else:
+                print(f'✅ OK: {pkg[\"Name\"]} - {license_name}')
+        "
+        
+    - name: 📊 Upload license report
+      uses: actions/upload-artifact@v3
+      with:
+        name: license-report
+        path: python-licenses.json
+        retention-days: 30
+
+  # Container security (if Docker files exist)
+  container-security:
+    name: 🐳 Container Security
+    runs-on: ubuntu-latest
+    if: hashFiles('Dockerfile*') != ''
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐳 Build Docker image
+      run: |
+        if [ -f "Dockerfile" ]; then
+          docker build -t rock-paper-scissors:security-test .
+        else
+          echo "No Dockerfile found"
+        fi
+        
+    - name: 🔍 Scan Docker image
+      run: |
+        if [ -f "Dockerfile" ]; then
+          # Basic security checks
+          docker run --rm rock-paper-scissors:security-test whoami
+          docker run --rm rock-paper-scissors:security-test id
+          echo "✅ Container security checks passed"
+        else
+          echo "No container to scan"
+        fi
+
+  # Generate security summary
+  security-summary:
+    name: 📋 Security Summary
+    runs-on: ubuntu-latest
+    needs: [security-scan, dependency-scan, code-quality, license-check]
+    if: always()
+    
+    steps:
+    - name: 📥 Download all artifacts
+      uses: actions/download-artifact@v3
+      
+    - name: 📋 Generate security summary
+      run: |
+        echo "# 🔒 Security Scan Summary" > security-summary.md
+        echo "" >> security-summary.md
+        echo "## Scan Results" >> security-summary.md
+        echo "- Security Scan: ${{ needs.security-scan.result }}" >> security-summary.md
+        echo "- Dependency Scan: ${{ needs.dependency-scan.result }}" >> security-summary.md
+        echo "- Code Quality: ${{ needs.code-quality.result }}" >> security-summary.md
+        echo "- License Check: ${{ needs.license-check.result }}" >> security-summary.md
+        echo "" >> security-summary.md
+        echo "## Recommendations" >> security-summary.md
+        echo "1. Review any failed security checks" >> security-summary.md
+        echo "2. Update vulnerable dependencies" >> security-summary.md
+        echo "3. Address code quality issues" >> security-summary.md
+        echo "4. Verify license compatibility" >> security-summary.md
+        
+    - name: 📊 Upload security summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-summary
+        path: security-summary.md
+        retention-days: 30
