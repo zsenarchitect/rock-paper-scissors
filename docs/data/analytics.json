@@ -1,0 +1,17 @@
+{
+  "totalBattles": 0,
+  "totalVotes": 0,
+  "averageBattleDuration": 0,
+  "mostPopularRoom": "restaurant",
+  "teamWinRates": {
+    "1": 0,
+    "2": 0,
+    "3": 0
+  },
+  "conversionRates": {
+    "rock": 0,
+    "paper": 0,
+    "scissors": 0
+  },
+  "lastUpdated": null
+}

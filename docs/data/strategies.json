@@ -1,0 +1,26 @@
+{
+  "rock": {
+    "name": "Rock Strategy",
+    "aggression": 0.8,
+    "patience": 0.6,
+    "grouping": 0.7,
+    "speed": 0.9,
+    "vision": 100
+  },
+  "paper": {
+    "name": "Paper Strategy",
+    "aggression": 0.6,
+    "patience": 0.8,
+    "grouping": 0.5,
+    "speed": 1.1,
+    "vision": 120
+  },
+  "scissors": {
+    "name": "Scissors Strategy",
+    "aggression": 0.9,
+    "patience": 0.4,
+    "grouping": 0.3,
+    "speed": 1.2,
+    "vision": 80
+  }
+}

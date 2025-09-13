@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Manager Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Audio Manager Test</h1>
+    
+    <div class="test-container">
+        <h2>Audio Manager Status</h2>
+        <div id="status" class="status info">Initializing...</div>
+        <button class="test-button" onclick="testAudioManager()">Test Audio Manager</button>
+        <button class="test-button" onclick="testSoundLoading()">Test Sound Loading</button>
+        <button class="test-button" onclick="testSoundPlayback()">Test Sound Playback</button>
+        <button class="test-button" onclick="testErrorHandling()">Test Error Handling</button>
+    </div>
+    
+    <div class="test-container">
+        <h2>Sound Tests</h2>
+        <button class="test-button" onclick="playSound('click')">Play Click</button>
+        <button class="test-button" onclick="playSound('vote')">Play Vote</button>
+        <button class="test-button" onclick="playSound('victory')">Play Victory</button>
+        <button class="test-button" onclick="playSound('error')">Play Error</button>
+        <button class="test-button" onclick="playSound('rockConvert')">Play Rock Convert</button>
+        <button class="test-button" onclick="playSound('paperConvert')">Play Paper Convert</button>
+        <button class="test-button" onclick="playSound('scissorsConvert')">Play Scissors Convert</button>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test Log</h2>
+        <div id="log" class="log"></div>
+        <button class="test-button" onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <!-- Load required scripts -->
+    <script src="docs/js/config/game-config.js"></script>
+    <script src="docs/js/utils/logger.js"></script>
+    <script src="docs/js/utils/audio-manager.js"></script>
+
+    <script>
+        // Override console.log to capture logs
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        
+        function logToDiv(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logEntry.style.color = type === 'error' ? '#721c24' : type === 'warn' ? '#856404' : '#0c5460';
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logToDiv(args.join(' '), 'info');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            logToDiv(args.join(' '), 'warn');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logToDiv(args.join(' '), 'error');
+        };
+        
+        // Test functions
+        function testAudioManager() {
+            console.log('Testing Audio Manager initialization...');
+            
+            if (typeof audioManager !== 'undefined') {
+                const status = audioManager.getStatus();
+                updateStatus(`Audio Manager loaded successfully!<br>
+                    Enabled: ${status.enabled}<br>
+                    Volume: ${status.volume}<br>
+                    Context State: ${status.contextState}<br>
+                    Loaded Sounds: ${status.loadedSounds.length}`, 'success');
+            } else {
+                updateStatus('Audio Manager not found!', 'error');
+            }
+        }
+        
+        function testSoundLoading() {
+            console.log('Testing sound loading...');
+            
+            if (typeof audioManager !== 'undefined') {
+                const status = audioManager.getStatus();
+                updateStatus(`Sound loading test completed!<br>
+                    Loaded sounds: ${status.loadedSounds.join(', ')}`, 'success');
+            } else {
+                updateStatus('Audio Manager not available!', 'error');
+            }
+        }
+        
+        function testSoundPlayback() {
+            console.log('Testing sound playback...');
+            
+            if (typeof audioManager !== 'undefined') {
+                // Test debug sound
+                audioManager.createDebugSound(440, 0.2);
+                updateStatus('Sound playback test completed! Check console for debug sound.', 'success');
+            } else {
+                updateStatus('Audio Manager not available!', 'error');
+            }
+        }
+        
+        function testErrorHandling() {
+            console.log('Testing error handling...');
+            
+            if (typeof audioManager !== 'undefined') {
+                // Try to play a non-existent sound
+                audioManager.playSound('nonexistent');
+                updateStatus('Error handling test completed! Check console for error messages.', 'info');
+            } else {
+                updateStatus('Audio Manager not available!', 'error');
+            }
+        }
+        
+        function playSound(soundName) {
+            console.log(`Playing sound: ${soundName}`);
+            
+            if (typeof audioManager !== 'undefined') {
+                audioManager.playSound(soundName);
+            } else {
+                console.error('Audio Manager not available!');
+            }
+        }
+        
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            console.log('Audio Manager Test Page loaded');
+            testAudioManager();
+        });
+    </script>
+</body>
+</html>

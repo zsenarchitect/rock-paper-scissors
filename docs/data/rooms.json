@@ -1,0 +1,32 @@
+{
+  "restaurant": {
+    "name": "Restaurant Wars",
+    "teams": ["McDonald's", "Burger King", "KFC"],
+    "colors": ["#ff6b6b", "#4ecdc4", "#45b7d1"],
+    "sprites": ["mcdonalds.png", "burger-king.png", "kfc.png"],
+    "isActive": true,
+    "battleCount": 0,
+    "lastBattle": null,
+    "totalVotes": 0
+  },
+  "ideology": {
+    "name": "Ideology Clash",
+    "teams": ["Liberal", "Conservative", "Progressive"],
+    "colors": ["#ff6b6b", "#4ecdc4", "#45b7d1"],
+    "sprites": ["liberal.png", "conservative.png", "progressive.png"],
+    "isActive": false,
+    "battleCount": 0,
+    "lastBattle": null,
+    "totalVotes": 0
+  },
+  "brand": {
+    "name": "Brand Battle",
+    "teams": ["Coca-Cola", "Pepsi", "Sprite"],
+    "colors": ["#ff6b6b", "#4ecdc4", "#45b7d1"],
+    "sprites": ["coca-cola.png", "pepsi.png", "sprite.png"],
+    "isActive": false,
+    "battleCount": 0,
+    "lastBattle": null,
+    "totalVotes": 0
+  }
+}

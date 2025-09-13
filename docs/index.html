@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors Battle Royale</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎮 Rock Paper Scissors Battle Royale</h1>
+            <p>Watch the ultimate battle unfold! Vote to support your team!</p>
+        </header>
+
+        <!-- Room Selection -->
+        <div class="room-selection">
+            <h2>Choose Your Battle Room</h2>
+            <div class="rooms-grid">
+                <div class="room-card" data-room="restaurant">
+                    <h3>🍔 Restaurant Wars</h3>
+                    <p>McDonald's vs Burger King vs KFC</p>
+                    <div class="room-status">Live Battle</div>
+                </div>
+                <div class="room-card" data-room="ideology">
+                    <h3>🏛️ Ideology Clash</h3>
+                    <p>Liberal vs Conservative vs Progressive</p>
+                    <div class="room-status">Voting Open</div>
+                </div>
+                <div class="room-card" data-room="brand">
+                    <h3>🥤 Brand Battle</h3>
+                    <p>Coca-Cola vs Pepsi vs Sprite</p>
+                    <div class="room-status">Starting Soon</div>
+                </div>
+                <div class="room-card" data-room="custom">
+                    <h3>🎯 Custom Battle</h3>
+                    <p>Create your own battle</p>
+                    <div class="room-status">Available</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <div class="game-container">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="game-overlay">
+                <div class="team-counts">
+                    <div class="team-count" id="team1-count">
+                        <span class="team-name">Team 1</span>
+                        <span class="count">40</span>
+                    </div>
+                    <div class="team-count" id="team2-count">
+                        <span class="team-name">Team 2</span>
+                        <span class="count">40</span>
+                    </div>
+                    <div class="team-count" id="team3-count">
+                        <span class="team-name">Team 3</span>
+                        <span class="count">40</span>
+                    </div>
+                </div>
+                <div class="voting-panel">
+                    <h3>Support Your Team!</h3>
+                    <div class="vote-buttons">
+                        <button class="vote-btn" data-team="1">Add Soldier to Team 1</button>
+                        <button class="vote-btn" data-team="2">Add Soldier to Team 2</button>
+                        <button class="vote-btn" data-team="3">Add Soldier to Team 3</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Charts -->
+        <div class="charts-container">
+            <div class="chart-panel">
+                <h3>Live Count</h3>
+                <canvas id="pieChart" width="300" height="200"></canvas>
+            </div>
+            <div class="chart-panel">
+                <h3>Battle Trend</h3>
+                <canvas id="trendChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Battle Info -->
+        <div class="battle-info">
+            <div class="battle-stats">
+                <div class="stat">
+                    <span class="label">Battle Time:</span>
+                    <span class="value" id="battle-time">00:00</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Total Conversions:</span>
+                    <span class="value" id="total-conversions">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Active Players:</span>
+                    <span class="value" id="active-players">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config/game-config.js"></script>
+    <script src="js/utils/logger.js"></script>
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/math-utils.js"></script>
+    <script src="js/utils/audio-manager.js"></script>
+    <script src="js/game/game-engine.js"></script>
+    <script src="js/entities/base-entity.js"></script>
+    <script src="js/entities/rock-entity.js"></script>
+    <script src="js/entities/paper-entity.js"></script>
+    <script src="js/entities/scissors-entity.js"></script>
+    <script src="js/game/entity-manager.js"></script>
+    <script src="js/game/collision-system.js"></script>
+    <script src="js/game/physics-engine.js"></script>
+    <script src="js/visualization/live-charts.js"></script>
+    <script src="js/visualization/pie-chart.js"></script>
+    <script src="js/visualization/trend-graph.js"></script>
+    <script src="js/voting/voting-system.js"></script>
+    <script src="js/rooms/room-manager.js"></script>
+    <script src="js/api/battle-api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
