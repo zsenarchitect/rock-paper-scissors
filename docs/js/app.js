@@ -183,11 +183,18 @@ class App {
         this.startUIUpdateLoop();
     }
 
-    // Start UI update loop
+    // Start UI update loop with throttling
     startUIUpdateLoop() {
+        let lastUIUpdate = 0;
+        const UI_UPDATE_INTERVAL = 100; // Update UI every 100ms instead of every frame
+        
         const updateUI = () => {
             if (this.gameEngine && this.gameEngine.isRunning) {
-                this.updateUI();
+                const now = Date.now();
+                if (now - lastUIUpdate >= UI_UPDATE_INTERVAL) {
+                    this.updateUI();
+                    lastUIUpdate = now;
+                }
                 requestAnimationFrame(updateUI);
             }
         };

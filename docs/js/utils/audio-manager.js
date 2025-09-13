@@ -58,15 +58,23 @@ class AudioManager {
     // Load individual sound
     async loadSound(name, path) {
         return new Promise((resolve, reject) => {
-            // Find the actual file (WAV or MP3)
-            const actualPath = this.findSoundFile(path);
-            if (!actualPath) {
-                logger.warn(`Sound file not found for: ${name} (tried: ${path})`);
-                reject(new Error(`Sound file not found: ${name}`));
-                return;
-            }
+            // Use the path directly since config now includes .mp3 extension
+            const audio = new Audio();
+            audio.preload = 'auto';
+            audio.volume = this.volume;
             
-            this.tryLoadSound(name, actualPath, path, resolve, reject);
+            audio.addEventListener('canplaythrough', () => {
+                this.sounds.set(name, audio);
+                logger.debug(`Sound loaded successfully: ${name} -> ${path}`);
+                resolve(audio);
+            });
+            
+            audio.addEventListener('error', (error) => {
+                logger.warn(`Failed to load sound: ${name} from ${path}`, error);
+                reject(error);
+            });
+            
+            audio.src = path;
         });
     }
 
@@ -136,19 +144,19 @@ class AudioManager {
         return null;
     }
 
-    // Play sound
+    // Play sound with throttling to reduce CPU usage
     playSound(soundName, volume = null) {
         if (!this.isEnabled) return;
         
         const sound = this.sounds.get(soundName);
         if (!sound) {
-            logger.warn(`Sound not found: ${soundName}`);
+            // Silently fail for missing sounds to reduce console spam
             return;
         }
         
         try {
-            // Clone audio for overlapping sounds
-            const audioToPlay = this.overlapSounds ? sound.cloneNode() : sound;
+            // Don't clone audio to reduce memory usage
+            const audioToPlay = sound;
             
             // Set volume
             if (volume !== null) {
@@ -165,13 +173,11 @@ class AudioManager {
             
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
-                    logger.warn(`Failed to play sound: ${soundName}`, error);
+                    // Silently handle errors to reduce console spam
                 });
             }
-            
-            logger.debug(`Playing sound: ${soundName}`);
         } catch (error) {
-            logger.warn(`Error playing sound: ${soundName}`, error);
+            // Silently handle errors to reduce console spam
         }
     }
 

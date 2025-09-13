@@ -3,25 +3,26 @@ const GameConfig = {
     // Game Settings
     game: {
         symbols: ['Rock', 'Paper', 'Scissors'],
-        countPerSymbol: 40,
+        countPerSymbol: 15, // Reduced from 40 to 15 for better performance
         canvasWidth: 800,
         canvasHeight: 600,
-        fps: 60,
+        fps: 30, // Reduced from 60 to 30 FPS
         battleDuration: 300000, // 5 minutes in milliseconds
         conversionRadius: 20,
         avoidanceRadius: 30,
         movementSpeed: 2,
-        maxEntities: 200
+        maxEntities: 100 // Reduced from 200 to 100
     },
 
     // Visual Settings
     visual: {
-        particleEffects: true,
-        trailEffects: true,
-        celebrationEffects: true,
+        particleEffects: false, // Disabled for performance
+        trailEffects: false, // Disabled for performance
+        celebrationEffects: false, // Disabled for performance
         showDebugOverlay: false,
         showCollisionBounds: false,
-        showEntityPaths: false
+        showEntityPaths: false,
+        drawGrid: false // Disabled grid drawing for performance
     },
 
     // Audio Settings
@@ -30,13 +31,13 @@ const GameConfig = {
         volume: 0.7,
         overlapSounds: true,
         soundEffects: {
-            rockConvert: 'sounds/effects/rock-convert',
-            paperConvert: 'sounds/effects/paper-convert',
-            scissorsConvert: 'sounds/effects/scissors-convert',
-            click: 'sounds/ui/click',
-            vote: 'sounds/ui/vote',
-            victory: 'sounds/ui/victory',
-            error: 'sounds/ui/error'
+            rockConvert: 'assets/sounds/effects/rock-convert.mp3',
+            paperConvert: 'assets/sounds/effects/paper-convert.mp3',
+            scissorsConvert: 'assets/sounds/effects/scissors-convert.mp3',
+            click: 'assets/sounds/ui/click.mp3',
+            vote: 'assets/sounds/ui/vote.mp3',
+            victory: 'assets/sounds/ui/victory.mp3',
+            error: 'assets/sounds/ui/error.mp3'
         }
     },
 

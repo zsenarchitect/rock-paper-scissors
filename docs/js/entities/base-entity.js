@@ -44,15 +44,17 @@ class BaseEntity {
         return colors[this.team - 1] || '#999999';
     }
 
-    // Update entity logic
+    // Update entity logic with performance optimizations
     update(deltaTime, gameState) {
         if (!this.isAlive) return;
 
         this.survivalTime += deltaTime;
         this.lastUpdate = Date.now();
 
-        // Update AI behavior
-        this.updateAI(deltaTime, gameState);
+        // Update AI behavior less frequently
+        if (this.lastUpdate % 100 < 50) { // Only update AI every other frame
+            this.updateAI(deltaTime, gameState);
+        }
 
         // Update position based on velocity
         const movement = MathUtils.multiply(this.velocity, deltaTime / 1000);
@@ -62,8 +64,10 @@ class BaseEntity {
         // Keep entity within bounds
         this.clampToBounds();
 
-        // Update visual properties
-        this.updateVisuals(deltaTime);
+        // Update visual properties less frequently
+        if (this.lastUpdate % 60 < 30) { // Only update visuals every other frame
+            this.updateVisuals(deltaTime);
+        }
     }
 
     // AI behavior update
