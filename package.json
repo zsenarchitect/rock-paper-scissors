@@ -4,24 +4,26 @@
   "description": "AI Training Platform & Crowd Engagement Game",
   "main": "docs/index.html",
   "scripts": {
-    "test": "echo \"No frontend tests configured yet\"",
-    "lint": "echo \"No linting configured yet\"",
-    "format": "echo \"No formatting configured yet\""
+    "start": "node scripts/server.js",
+    "dev": "node scripts/server.js --port 3000 --open",
+    "serve": "npx http-server docs -p 3000 -o",
+    "build": "echo 'No build step required for static site'",
+    "test": "echo 'No tests specified'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zsenarchitect/rock-paper-scissors.git"
   },
   "keywords": [
     "rock-paper-scissors",
     "battle-royale",
     "ai-training",
-    "simulation",
-    "game"
+    "game",
+    "simulation"
   ],
   "author": "Sen Zhang",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^8.0.0",
-    "prettier": "^3.0.0"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "http-server": "^14.1.1"
   }
 }

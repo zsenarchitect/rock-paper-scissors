@@ -52,6 +52,13 @@
 - **`open game site`** - Open the live GitHub Pages website in default browser
 - **`view live demo`** - Open the live GitHub Pages website in default browser
 
+### 🖥️ Local Development Commands
+- **`start local server`** - Start local HTTP server to run the game locally
+- **`run locally`** - Start local HTTP server to run the game locally
+- **`serve locally`** - Start local HTTP server to run the game locally
+- **`npm start`** - Start local server using npm script
+- **`npm run dev`** - Start local server with auto-open browser
+
 ## 🎯 COMMAND PATTERNS
 
 ### Issue Workflow Pattern
