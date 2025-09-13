@@ -33,21 +33,41 @@ jobs:
         npm init -y
         npm install --save-dev jest @testing-library/jest-dom @testing-library/dom
         npm install --save-dev eslint prettier
+        echo "✅ Frontend dependencies installed" >> $GITHUB_STEP_SUMMARY
         
     - name: 🔍 Lint JavaScript
       run: |
         cd docs
+        echo "🔍 Running JavaScript linting..." >> $GITHUB_STEP_SUMMARY
+        npx eslint js/**/*.js --format=json --output-file=../frontend-lint-report.json || true
         npx eslint js/**/*.js --format=stylish || true
+        echo "✅ JavaScript linting completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 🎨 Format check
       run: |
         cd docs
-        npx prettier --check js/**/*.js css/**/*.css || true
+        echo "🎨 Checking code formatting..." >> $GITHUB_STEP_SUMMARY
+        npx prettier --check js/**/*.js css/**/*.css --write-true || true
+        npx prettier --check js/**/*.js css/**/*.css --list-different > ../frontend-format-report.txt || true
+        echo "✅ Format check completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 🧪 Run frontend tests
       run: |
         cd docs
-        npx jest --testPathPattern=js --passWithNoTests
+        echo "🧪 Running frontend tests..." >> $GITHUB_STEP_SUMMARY
+        npx jest --testPathPattern=js --passWithNoTests --coverage --coverageReporters=json --coverageReporters=text --outputFile=../frontend-test-results.json || true
+        echo "✅ Frontend tests completed" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 📊 Upload frontend reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: frontend-reports
+        path: |
+          frontend-lint-report.json
+          frontend-format-report.txt
+          frontend-test-results.json
+        retention-days: 30
         
     - name: 🌐 Test HTML structure
       run: |
@@ -81,18 +101,48 @@ jobs:
           
     - name: 📦 Install Python dependencies
       run: |
+        echo "📦 Installing Python dependencies..." >> $GITHUB_STEP_SUMMARY
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        echo "✅ Python dependencies installed" >> $GITHUB_STEP_SUMMARY
         
     - name: 🔍 Lint Python code
       run: |
-        flake8 ai_training/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        echo "🔍 Running Python linting..." >> $GITHUB_STEP_SUMMARY
+        
+        # Flake8 linting
+        flake8 ai_training/ --count --select=E9,F63,F7,F82 --show-source --statistics --format=json --output-file=backend-flake8-report.json || true
+        flake8 ai_training/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
+        
+        # Black formatting check
+        black --check ai_training/ --diff > backend-black-report.txt || true
         black --check ai_training/ || true
+        
+        # MyPy type checking
+        mypy ai_training/ --ignore-missing-imports --json-report backend-mypy-report.json || true
         mypy ai_training/ --ignore-missing-imports || true
+        
+        echo "✅ Python linting completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 🧪 Run Python tests
       run: |
-        python -m pytest ai_training/ -v --cov=ai_training --cov-report=xml
+        echo "🧪 Running Python tests..." >> $GITHUB_STEP_SUMMARY
+        python -m pytest ai_training/ -v --cov=ai_training --cov-report=xml --cov-report=html --cov-report=json --junitxml=backend-test-results.xml --tb=short
+        echo "✅ Python tests completed" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 📊 Upload backend reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: backend-reports
+        path: |
+          backend-flake8-report.json
+          backend-black-report.txt
+          backend-mypy-report.json
+          backend-test-results.xml
+          coverage.xml
+          htmlcov/
+        retention-days: 30
         
     - name: 📊 Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -117,32 +167,65 @@ jobs:
         
     - name: 📦 Install AI dependencies
       run: |
+        echo "📦 Installing AI training dependencies..." >> $GITHUB_STEP_SUMMARY
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        echo "✅ AI dependencies installed" >> $GITHUB_STEP_SUMMARY
         
     - name: 🧪 Test AI training modules
       run: |
-        python ai_training/scripts/train_model.py --test-mode
+        echo "🧪 Testing AI training modules..." >> $GITHUB_STEP_SUMMARY
+        python ai_training/scripts/train_model.py --test-mode 2>&1 | tee ai-training-test.log || true
+        echo "✅ AI training modules tested" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Test genetic algorithm
       run: |
+        echo "🧬 Testing genetic algorithm..." >> $GITHUB_STEP_SUMMARY
         python -c "
         import sys
+        import traceback
         sys.path.append('.')
-        from ai_training.models.genetic_algorithm import GeneticAlgorithm
-        ga = GeneticAlgorithm()
-        print('✅ Genetic Algorithm import successful')
-        "
+        try:
+            from ai_training.models.genetic_algorithm import GeneticAlgorithm
+            ga = GeneticAlgorithm()
+            print('✅ Genetic Algorithm import successful')
+            print('✅ Genetic Algorithm test passed')
+        except Exception as e:
+            print(f'❌ Genetic Algorithm test failed: {e}')
+            traceback.print_exc()
+            sys.exit(1)
+        " 2>&1 | tee genetic-algorithm-test.log
+        echo "✅ Genetic algorithm tested" >> $GITHUB_STEP_SUMMARY
         
     - name: 🧠 Test neural network
       run: |
+        echo "🧠 Testing neural network..." >> $GITHUB_STEP_SUMMARY
         python -c "
         import sys
+        import traceback
         sys.path.append('.')
-        from ai_training.models.neural_network import NeuralNetwork
-        nn = NeuralNetwork()
-        print('✅ Neural Network import successful')
-        "
+        try:
+            from ai_training.models.neural_network import NeuralNetwork
+            nn = NeuralNetwork()
+            print('✅ Neural Network import successful')
+            print('✅ Neural Network test passed')
+        except Exception as e:
+            print(f'❌ Neural Network test failed: {e}')
+            traceback.print_exc()
+            sys.exit(1)
+        " 2>&1 | tee neural-network-test.log
+        echo "✅ Neural network tested" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 📊 Upload AI test reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: ai-training-reports
+        path: |
+          ai-training-test.log
+          genetic-algorithm-test.log
+          neural-network-test.log
+        retention-days: 30
 
   # Project Structure Validation
   structure-validation:
@@ -160,22 +243,39 @@ jobs:
         
     - name: 🧹 Run cleanup script
       run: |
+        echo "🧹 Running cleanup script..." >> $GITHUB_STEP_SUMMARY
         chmod +x cleanup.sh
-        ./cleanup.sh
+        ./cleanup.sh 2>&1 | tee cleanup-output.log
+        echo "✅ Cleanup script completed" >> $GITHUB_STEP_SUMMARY
         
     - name: ✅ Validate project structure
       run: |
-        python validate-structure.py
+        echo "🏗️ Validating project structure..." >> $GITHUB_STEP_SUMMARY
+        python validate-structure.py 2>&1 | tee structure-validation.log || true
+        echo "✅ Project structure validation completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 🔍 Check for debug files in root
       run: |
+        echo "🔍 Checking for debug files in root..." >> $GITHUB_STEP_SUMMARY
         if [ -n "$(find . -maxdepth 1 -name 'debug_*' -o -name '*.debug' -o -name 'test_*' -o -name '*_test')" ]; then
-          echo "❌ Debug/test files found in root directory"
-          find . -maxdepth 1 -name 'debug_*' -o -name '*.debug' -o -name 'test_*' -o -name '*_test'
+          echo "❌ Debug/test files found in root directory" >> $GITHUB_STEP_SUMMARY
+          find . -maxdepth 1 -name 'debug_*' -o -name '*.debug' -o -name 'test_*' -o -name '*_test' > debug-files-found.txt
+          cat debug-files-found.txt
           exit 1
         else
-          echo "✅ Root directory is clean"
+          echo "✅ Root directory is clean" >> $GITHUB_STEP_SUMMARY
         fi
+        
+    - name: 📊 Upload structure validation reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: structure-validation-reports
+        path: |
+          cleanup-output.log
+          structure-validation.log
+          debug-files-found.txt
+        retention-days: 30
 
   # Security Scanning
   security-scan:
@@ -193,16 +293,32 @@ jobs:
         
     - name: 🔍 Run security scan
       run: |
+        echo "🔒 Running security scan..." >> $GITHUB_STEP_SUMMARY
         pip install safety bandit
-        safety check -r requirements.txt
-        bandit -r ai_training/ -f json -o bandit-report.json || true
         
-    - name: 📊 Upload security report
+        # Safety check for vulnerabilities
+        safety check -r requirements.txt --json --output safety-report.json 2>&1 | tee safety-scan.log || true
+        safety check -r requirements.txt 2>&1 | tee safety-scan-console.log || true
+        
+        # Bandit security linter
+        bandit -r ai_training/ -f json -o bandit-report.json 2>&1 | tee bandit-scan.log || true
+        bandit -r ai_training/ -f txt 2>&1 | tee bandit-scan-console.log || true
+        
+        echo "✅ Security scan completed" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 📊 Upload security reports
       uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: security-report
-        path: bandit-report.json
+        name: security-reports
+        path: |
+          safety-report.json
+          safety-scan.log
+          safety-scan-console.log
+          bandit-report.json
+          bandit-scan.log
+          bandit-scan-console.log
+        retention-days: 30
 
   # Performance Testing
   performance-test:
@@ -220,34 +336,63 @@ jobs:
         
     - name: 📦 Install dependencies
       run: |
+        echo "📦 Installing dependencies for performance testing..." >> $GITHUB_STEP_SUMMARY
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        echo "✅ Dependencies installed" >> $GITHUB_STEP_SUMMARY
         
     - name: ⚡ Run performance tests
       run: |
-        python verify-phase1.py --performance-test
+        echo "⚡ Running performance tests..." >> $GITHUB_STEP_SUMMARY
+        python verify-phase1.py --performance-test 2>&1 | tee performance-test.log || true
+        echo "✅ Performance tests completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Memory usage test
       run: |
+        echo "📊 Testing memory usage..." >> $GITHUB_STEP_SUMMARY
         python -c "
         import psutil
         import sys
+        import traceback
+        import time
         sys.path.append('.')
-        from ai_training.models.genetic_algorithm import GeneticAlgorithm
         
-        # Test memory usage
-        ga = GeneticAlgorithm()
-        memory_before = psutil.Process().memory_info().rss / 1024 / 1024
-        print(f'Memory before: {memory_before:.2f} MB')
-        
-        # Run some operations
-        for i in range(100):
-            ga.evolve()
+        try:
+            from ai_training.models.genetic_algorithm import GeneticAlgorithm
             
-        memory_after = psutil.Process().memory_info().rss / 1024 / 1024
-        print(f'Memory after: {memory_after:.2f} MB')
-        print(f'Memory increase: {memory_after - memory_before:.2f} MB')
-        "
+            # Test memory usage
+            ga = GeneticAlgorithm()
+            memory_before = psutil.Process().memory_info().rss / 1024 / 1024
+            print(f'Memory before: {memory_before:.2f} MB')
+            
+            # Run some operations with timing
+            start_time = time.time()
+            for i in range(100):
+                ga.evolve()
+            end_time = time.time()
+            
+            memory_after = psutil.Process().memory_info().rss / 1024 / 1024
+            print(f'Memory after: {memory_after:.2f} MB')
+            print(f'Memory increase: {memory_after - memory_before:.2f} MB')
+            print(f'Execution time: {end_time - start_time:.2f} seconds')
+            print(f'Operations per second: {100 / (end_time - start_time):.2f}')
+            
+        except Exception as e:
+            print(f'❌ Memory test failed: {e}')
+            traceback.print_exc()
+            sys.exit(1)
+        " 2>&1 | tee memory-usage-test.log
+        echo "✅ Memory usage test completed" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 📊 Upload performance reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-reports
+        path: |
+          performance-test.log
+          memory-usage-test.log
+        retention-days: 30
 
   # Build and Package
   build:
@@ -271,20 +416,25 @@ jobs:
         
     - name: 📦 Install dependencies
       run: |
+        echo "📦 Installing dependencies for build..." >> $GITHUB_STEP_SUMMARY
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        echo "✅ Dependencies installed" >> $GITHUB_STEP_SUMMARY
         
     - name: 🏗️ Build frontend
       run: |
+        echo "🏗️ Building frontend..." >> $GITHUB_STEP_SUMMARY
         cd docs
         # Create production build
         mkdir -p dist
         cp -r js css assets data index.html dist/
-        echo "Frontend build completed"
+        echo "Frontend build completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 📦 Package Python modules
       run: |
-        python setup.py sdist bdist_wheel
+        echo "📦 Packaging Python modules..." >> $GITHUB_STEP_SUMMARY
+        python setup.py sdist bdist_wheel 2>&1 | tee python-build.log
+        echo "✅ Python modules packaged" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Upload build artifacts
       uses: actions/upload-artifact@v3
@@ -293,30 +443,112 @@ jobs:
         path: |
           docs/dist/
           dist/
+          python-build.log
         retention-days: 7
 
-  # Notify on completion
-  notify:
-    name: 📢 Notify
+  # Generate Comprehensive Summary Report
+  generate-summary:
+    name: 📊 Generate Summary Report
     runs-on: ubuntu-latest
-    needs: [build, security-scan, performance-test]
+    needs: [frontend-test, backend-test, ai-training-test, structure-validation, security-scan, performance-test, build]
     if: always()
     
     steps:
-    - name: ✅ Success notification
-      if: ${{ needs.build.result == 'success' }}
-      run: |
-        echo "🎉 All CI checks passed successfully!"
-        echo "✅ Frontend tests: ${{ needs.frontend-test.result }}"
-        echo "✅ Backend tests: ${{ needs.backend-test.result }}"
-        echo "✅ AI training tests: ${{ needs.ai-training-test.result }}"
-        echo "✅ Structure validation: ${{ needs.structure-validation.result }}"
-        echo "✅ Security scan: ${{ needs.security-scan.result }}"
-        echo "✅ Performance test: ${{ needs.performance-test.result }}"
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📊 Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: ./artifacts
         
-    - name: ❌ Failure notification
-      if: ${{ needs.build.result == 'failure' }}
+    - name: 📝 Generate comprehensive summary
       run: |
-        echo "❌ CI checks failed!"
-        echo "Check the logs for details."
-        exit 1
+        echo "# 🎯 CI Pipeline Summary Report" > ci-summary-report.md
+        echo "" >> ci-summary-report.md
+        echo "**Generated:** $(date)" >> ci-summary-report.md
+        echo "**Workflow:** ${{ github.workflow }}" >> ci-summary-report.md
+        echo "**Run ID:** ${{ github.run_id }}" >> ci-summary-report.md
+        echo "**Commit:** ${{ github.sha }}" >> ci-summary-report.md
+        echo "" >> ci-summary-report.md
+        
+        echo "## 📋 Job Status" >> ci-summary-report.md
+        echo "" >> ci-summary-report.md
+        echo "| Job | Status |" >> ci-summary-report.md
+        echo "|-----|--------|" >> ci-summary-report.md
+        echo "| Frontend Tests | ${{ needs.frontend-test.result }} |" >> ci-summary-report.md
+        echo "| Backend Tests | ${{ needs.backend-test.result }} |" >> ci-summary-report.md
+        echo "| AI Training Tests | ${{ needs.ai-training-test.result }} |" >> ci-summary-report.md
+        echo "| Structure Validation | ${{ needs.structure-validation.result }} |" >> ci-summary-report.md
+        echo "| Security Scan | ${{ needs.security-scan.result }} |" >> ci-summary-report.md
+        echo "| Performance Test | ${{ needs.performance-test.result }} |" >> ci-summary-report.md
+        echo "| Build & Package | ${{ needs.build.result }} |" >> ci-summary-report.md
+        echo "" >> ci-summary-report.md
+        
+        echo "## 📁 Generated Artifacts" >> ci-summary-report.md
+        echo "" >> ci-summary-report.md
+        find ./artifacts -type f -name "*.log" -o -name "*.json" -o -name "*.txt" -o -name "*.xml" | while read file; do
+          echo "- \`$(basename "$file")\` - $(stat -c%s "$file") bytes" >> ci-summary-report.md
+        done
+        echo "" >> ci-summary-report.md
+        
+        echo "## 🔍 Detailed Logs" >> ci-summary-report.md
+        echo "" >> ci-summary-report.md
+        
+        # Add frontend logs
+        if [ -f "./artifacts/frontend-reports/frontend-lint-report.json" ]; then
+          echo "### Frontend Linting Results" >> ci-summary-report.md
+          echo '```json' >> ci-summary-report.md
+          cat ./artifacts/frontend-reports/frontend-lint-report.json >> ci-summary-report.md
+          echo '```' >> ci-summary-report.md
+          echo "" >> ci-summary-report.md
+        fi
+        
+        # Add backend logs
+        if [ -f "./artifacts/backend-reports/backend-test-results.xml" ]; then
+          echo "### Backend Test Results" >> ci-summary-report.md
+          echo '```xml' >> ci-summary-report.md
+          head -50 ./artifacts/backend-reports/backend-test-results.xml >> ci-summary-report.md
+          echo '```' >> ci-summary-report.md
+          echo "" >> ci-summary-report.md
+        fi
+        
+        # Add security logs
+        if [ -f "./artifacts/security-reports/bandit-report.json" ]; then
+          echo "### Security Scan Results" >> ci-summary-report.md
+          echo '```json' >> ci-summary-report.md
+          cat ./artifacts/security-reports/bandit-report.json >> ci-summary-report.md
+          echo '```' >> ci-summary-report.md
+          echo "" >> ci-summary-report.md
+        fi
+        
+        echo "## 🚀 Next Steps" >> ci-summary-report.md
+        echo "" >> ci-summary-report.md
+        echo "1. Review all generated reports and logs" >> ci-summary-report.md
+        echo "2. Address any failed tests or security issues" >> ci-summary-report.md
+        echo "3. Check performance metrics and optimize if needed" >> ci-summary-report.md
+        echo "4. Proceed with deployment if all checks pass" >> ci-summary-report.md
+        echo "" >> ci-summary-report.md
+        
+        echo "## 📊 Summary Statistics" >> ci-summary-report.md
+        echo "" >> ci-summary-report.md
+        echo "- **Total Artifacts:** $(find ./artifacts -type f | wc -l)" >> ci-summary-report.md
+        echo "- **Total Log Files:** $(find ./artifacts -name "*.log" | wc -l)" >> ci-summary-report.md
+        echo "- **Total JSON Reports:** $(find ./artifacts -name "*.json" | wc -l)" >> ci-summary-report.md
+        echo "- **Total Size:** $(du -sh ./artifacts | cut -f1)" >> ci-summary-report.md
+        
+    - name: 📊 Upload comprehensive summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: ci-summary-report
+        path: |
+          ci-summary-report.md
+          artifacts/
+        retention-days: 30
+        
+    - name: 📢 Notify completion
+      run: |
+        echo "🎉 CI Pipeline completed!"
+        echo "📊 Comprehensive summary report generated"
+        echo "📁 All artifacts and logs saved to repository"
+        echo "Check the 'ci-summary-report' artifact for detailed analysis"

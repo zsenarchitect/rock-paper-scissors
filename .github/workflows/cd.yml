@@ -42,18 +42,42 @@ jobs:
         
     - name: 🏗️ Build frontend
       run: |
+        echo "🏗️ Building production frontend..." >> $GITHUB_STEP_SUMMARY
         cd docs
+        
+        # Create build log
+        echo "Starting frontend build process..." > ../deployment-build.log
+        echo "Timestamp: $(date)" >> ../deployment-build.log
+        echo "Node version: $(node --version)" >> ../deployment-build.log
+        echo "NPM version: $(npm --version)" >> ../deployment-build.log
+        echo "" >> ../deployment-build.log
+        
         # Optimize for production
-        echo "Building production frontend..."
+        echo "Building production frontend..." >> ../deployment-build.log
         
         # Minify CSS (basic minification)
+        echo "Minifying CSS files..." >> ../deployment-build.log
         find css -name "*.css" -exec sed -i 's/\/\*.*\*\///g; s/\s\+/ /g; s/;\s*/;/g' {} \;
+        echo "CSS minification completed" >> ../deployment-build.log
         
         # Create production index.html
         cp index.html index.prod.html
         
         # Add production optimizations
-        echo "Frontend build completed"
+        echo "Adding production optimizations..." >> ../deployment-build.log
+        sed -i 's/<!-- Production optimizations -->/<!-- Production optimizations -->\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <meta name="description" content="Rock Paper Scissors Battle Royale - AI Training Platform">\n  <meta name="keywords" content="rock paper scissors, battle royale, ai training, simulation">\n  <meta name="author" content="Rock Paper Scissors Team">\n  <link rel="canonical" href="https://zsenarchitect.github.io/rock-paper-scissors/">\n  <meta property="og:title" content="Rock Paper Scissors Battle Royale">\n  <meta property="og:description" content="AI Training Platform for Rock Paper Scissors Battle Simulation">\n  <meta property="og:url" content="https://zsenarchitect.github.io/rock-paper-scissors/">\n  <meta property="og:type" content="website">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="Rock Paper Scissors Battle Royale">\n  <meta name="twitter:description" content="AI Training Platform for Rock Paper Scissors Battle Simulation">/' index.prod.html
+        
+        echo "Frontend build completed successfully" >> ../deployment-build.log
+        echo "✅ Frontend build completed" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 📊 Upload build logs
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: deployment-build-logs
+        path: |
+          deployment-build.log
+        retention-days: 30
         
     - name: 📦 Setup Pages
       uses: actions/configure-pages@v3
@@ -66,6 +90,39 @@ jobs:
     - name: 🚀 Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v2
+      
+    - name: 📊 Generate deployment report
+      if: always()
+      run: |
+        echo "# 🚀 Deployment Report" > deployment-report.md
+        echo "" >> deployment-report.md
+        echo "**Deployment Time:** $(date)" >> deployment-report.md
+        echo "**Commit:** ${{ github.sha }}" >> deployment-report.md
+        echo "**Branch:** ${{ github.ref_name }}" >> deployment-report.md
+        echo "**Actor:** ${{ github.actor }}" >> deployment-report.md
+        echo "" >> deployment-report.md
+        echo "## 📋 Deployment Status" >> deployment-report.md
+        echo "" >> deployment-report.md
+        echo "| Component | Status |" >> deployment-report.md
+        echo "|-----------|--------|" >> deployment-report.md
+        echo "| Frontend Build | ${{ steps.deployment.outcome }} |" >> deployment-report.md
+        echo "| GitHub Pages | ${{ steps.deployment.outcome }} |" >> deployment-report.md
+        echo "" >> deployment-report.md
+        echo "## 🔗 Deployment URLs" >> deployment-report.md
+        echo "" >> deployment-report.md
+        echo "- **GitHub Pages:** https://zsenarchitect.github.io/rock-paper-scissors/" >> deployment-report.md
+        echo "- **Repository:** https://github.com/zsenarchitect/rock-paper-scissors" >> deployment-report.md
+        echo "" >> deployment-report.md
+        
+    - name: 📊 Upload deployment report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: deployment-report
+        path: |
+          deployment-report.md
+          deployment-build.log
+        retention-days: 30
 
   # Deploy AI Training API (if backend exists)
   deploy-api:

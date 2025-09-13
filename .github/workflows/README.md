@@ -1,6 +1,57 @@
 # 🚀 GitHub Actions Workflows
 
-This directory contains comprehensive GitHub Actions workflows for the Rock Paper Scissors Battle Royale project.
+This directory contains comprehensive GitHub Actions workflows for the Rock Paper Scissors Battle Royale project with **advanced logging, traceback generation, and comprehensive reporting**.
+
+## 🔧 Logging & Traceback System
+
+### 📊 Comprehensive Logging Features
+All workflows now include:
+- **Real-time progress tracking** in GitHub step summaries
+- **Detailed execution logs** saved as artifacts
+- **Error tracebacks** with full context and debugging information
+- **Performance metrics** and timing information
+- **System information** and environment details
+- **Automatic artifact upload** for all logs and reports
+
+### 🚨 Advanced Error Handling
+- **Automatic error detection** with detailed tracebacks
+- **Error classification** by type (script, command, network, file, etc.)
+- **Recommended actions** for each error type
+- **Debug information** including system state and environment
+- **Comprehensive traceback files** with full context
+
+### 📁 Generated Log Files
+- `workflow.log` - Main workflow execution log
+- `error.log` - Error-specific logs
+- `debug.log` - Debug information
+- `trace.log` - Detailed function tracing
+- `performance.log` - Performance metrics
+- `traceback-*.log` - Detailed error tracebacks
+
+### 🛠️ Logging Scripts
+- **`.github/scripts/logging-config.sh`** - Standardized logging functions
+- **`.github/scripts/error-handler.sh`** - Comprehensive error handling
+- **`.github/scripts/generate-workflow-summary.sh`** - Summary report generation
+
+## 📊 Artifacts & Reports
+
+### Generated Artifacts (30-day retention)
+- `frontend-reports` - Frontend test, lint, and format results
+- `backend-reports` - Backend test, coverage, and analysis results  
+- `ai-training-reports` - AI training test results and logs
+- `security-reports` - Security scan results and vulnerability reports
+- `performance-reports` - Performance test results and metrics
+- `cleanup-reports` - Cleanup operation logs and reports
+- `ci-summary-report` - Comprehensive CI pipeline summary
+- `deployment-report` - Deployment status and build logs
+- `error-traceback-*` - Detailed error tracebacks and debugging info
+
+### Report Types
+- **Markdown reports** - Human-readable summaries
+- **JSON reports** - Machine-readable data
+- **XML reports** - Test results and coverage
+- **Log files** - Detailed execution logs
+- **Traceback files** - Error debugging information
 
 ## 📋 Workflow Overview
 

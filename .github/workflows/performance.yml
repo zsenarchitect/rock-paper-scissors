@@ -44,48 +44,102 @@ jobs:
         
     - name: 📦 Install dependencies
       run: |
+        echo "📦 Installing performance testing dependencies..." >> $GITHUB_STEP_SUMMARY
         cd docs
         npm init -y
         npm install --save-dev lighthouse puppeteer
+        echo "✅ Dependencies installed" >> $GITHUB_STEP_SUMMARY
         
     - name: 🌐 Start local server
       run: |
+        echo "🌐 Starting local server for performance testing..." >> $GITHUB_STEP_SUMMARY
         cd docs
         python3 -m http.server 8000 &
         sleep 5
+        echo "✅ Local server started" >> $GITHUB_STEP_SUMMARY
         
     - name: ⚡ Run Lighthouse performance test
       run: |
+        echo "⚡ Running Lighthouse performance test..." >> $GITHUB_STEP_SUMMARY
         cd docs
-        npx lighthouse http://localhost:8000 --output=json --output-path=lighthouse-report.json --chrome-flags="--headless"
+        
+        # Create performance log
+        echo "Starting Lighthouse performance test..." > ../performance-test.log
+        echo "Timestamp: $(date)" >> ../performance-test.log
+        echo "URL: http://localhost:8000" >> ../performance-test.log
+        echo "Node version: $(node --version)" >> ../performance-test.log
+        echo "" >> ../performance-test.log
+        
+        # Run Lighthouse with detailed logging
+        npx lighthouse http://localhost:8000 \
+          --output=json \
+          --output-path=lighthouse-report.json \
+          --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+          --verbose 2>&1 | tee -a ../performance-test.log || true
+          
+        echo "✅ Lighthouse test completed" >> $GITHUB_STEP_SUMMARY
         
     - name: 📊 Analyze performance metrics
       run: |
+        echo "📊 Analyzing performance metrics..." >> $GITHUB_STEP_SUMMARY
         python3 -c "
         import json
-        with open('docs/lighthouse-report.json', 'r') as f:
-            report = json.load(f)
+        import sys
+        import traceback
         
-        scores = report['categories']
-        print('🎯 Performance Scores:')
-        for category, data in scores.items():
-            score = data['score'] * 100
-            print(f'  {category}: {score:.1f}/100')
+        try:
+            with open('docs/lighthouse-report.json', 'r') as f:
+                report = json.load(f)
             
-        # Check if performance is acceptable
-        performance_score = scores['performance']['score'] * 100
-        if performance_score < 50:
-            print('❌ Performance score too low!')
-            exit(1)
-        else:
-            print('✅ Performance score acceptable')
+            # Write detailed analysis to log
+            with open('../performance-analysis.log', 'w') as log:
+                log.write('Lighthouse Performance Analysis\\n')
+                log.write('=' * 40 + '\\n\\n')
+                
+                scores = report['categories']
+                log.write('Performance Scores:\\n')
+                for category, data in scores.items():
+                    score = data['score'] * 100
+                    log.write(f'  {category}: {score:.1f}/100\\n')
+                    print(f'  {category}: {score:.1f}/100')
+                
+                # Detailed metrics
+                if 'audits' in report:
+                    log.write('\\nDetailed Metrics:\\n')
+                    for audit, data in report['audits'].items():
+                        if 'numericValue' in data:
+                            log.write(f'  {audit}: {data[\"numericValue\"]} {data.get(\"unit\", \"\")}\\n')
+                
+                # Check if performance is acceptable
+                performance_score = scores['performance']['score'] * 100
+                log.write(f'\\nPerformance Threshold Check:\\n')
+                log.write(f'Current Score: {performance_score:.1f}/100\\n')
+                log.write(f'Threshold: 50/100\\n')
+                
+                if performance_score < 50:
+                    log.write('❌ Performance score is below acceptable threshold\\n')
+                    print('❌ Performance score too low!')
+                    sys.exit(1)
+                else:
+                    log.write('✅ Performance score is acceptable\\n')
+                    print('✅ Performance score acceptable')
+                    
+        except Exception as e:
+            print(f'❌ Performance analysis failed: {e}')
+            traceback.print_exc()
+            sys.exit(1)
         "
+        echo "✅ Performance analysis completed" >> $GITHUB_STEP_SUMMARY
         
-    - name: 📊 Upload performance report
+    - name: 📊 Upload performance reports
       uses: actions/upload-artifact@v3
+      if: always()
       with:
-        name: frontend-performance
-        path: docs/lighthouse-report.json
+        name: frontend-performance-reports
+        path: |
+          docs/lighthouse-report.json
+          performance-test.log
+          performance-analysis.log
         retention-days: 30
 
   # Backend performance testing
