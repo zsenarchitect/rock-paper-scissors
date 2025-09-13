@@ -1,0 +1,245 @@
+/* Pixel Art Sprites for Rock Paper Scissors */
+
+/* Rock Sprite */
+.rock-sprite {
+    width: 32px;
+    height: 32px;
+    background: 
+        /* Rock body */
+        linear-gradient(45deg, #8B4513 0%, #A0522D 25%, #8B4513 50%, #654321 75%, #8B4513 100%);
+    border: 2px solid #654321;
+    border-radius: 0;
+    position: relative;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    box-shadow: 
+        2px 2px 0px #654321,
+        4px 4px 0px #0f3460;
+}
+
+.rock-sprite::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 8px;
+    height: 8px;
+    background: #A0522D;
+    border-radius: 0;
+}
+
+.rock-sprite::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    right: 6px;
+    width: 6px;
+    height: 6px;
+    background: #654321;
+    border-radius: 0;
+}
+
+/* Paper Sprite */
+.paper-sprite {
+    width: 32px;
+    height: 32px;
+    background: 
+        /* Paper base */
+        linear-gradient(45deg, #FFFFFF 0%, #F5F5F5 25%, #FFFFFF 50%, #E8E8E8 75%, #FFFFFF 100%);
+    border: 2px solid #C0C0C0;
+    border-radius: 0;
+    position: relative;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    box-shadow: 
+        2px 2px 0px #C0C0C0,
+        4px 4px 0px #0f3460;
+}
+
+.paper-sprite::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 20px;
+    height: 2px;
+    background: #000000;
+    border-radius: 0;
+}
+
+.paper-sprite::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 6px;
+    width: 16px;
+    height: 2px;
+    background: #000000;
+    border-radius: 0;
+}
+
+/* Scissors Sprite */
+.scissors-sprite {
+    width: 32px;
+    height: 32px;
+    background: 
+        /* Scissors base */
+        linear-gradient(45deg, #C0C0C0 0%, #E8E8E8 25%, #C0C0C0 50%, #A8A8A8 75%, #C0C0C0 100%);
+    border: 2px solid #A8A8A8;
+    border-radius: 0;
+    position: relative;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    box-shadow: 
+        2px 2px 0px #A8A8A8,
+        4px 4px 0px #0f3460;
+}
+
+.scissors-sprite::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 16px;
+    height: 2px;
+    background: #000000;
+    transform: rotate(45deg);
+    border-radius: 0;
+}
+
+.scissors-sprite::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 16px;
+    height: 2px;
+    background: #000000;
+    transform: rotate(-45deg);
+    border-radius: 0;
+}
+
+/* Pixel Art Animations for Sprites */
+@keyframes spriteBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@keyframes spriteRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes spritePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.rock-sprite:hover {
+    animation: spriteBounce 0.5s ease-in-out;
+}
+
+.paper-sprite:hover {
+    animation: spritePulse 0.5s ease-in-out;
+}
+
+.scissors-sprite:hover {
+    animation: spriteRotate 0.5s ease-in-out;
+}
+
+/* Pixel Art Team Indicators */
+.team-indicator {
+    width: 16px;
+    height: 16px;
+    border: 2px solid;
+    border-radius: 0;
+    display: inline-block;
+    margin-right: 8px;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.team-indicator.team-1 {
+    background: #e74c3c;
+    border-color: #c0392b;
+}
+
+.team-indicator.team-2 {
+    background: #27ae60;
+    border-color: #229954;
+}
+
+.team-indicator.team-3 {
+    background: #3498db;
+    border-color: #2980b9;
+}
+
+/* Pixel Art Power-ups */
+.power-up {
+    width: 24px;
+    height: 24px;
+    background: #f39c12;
+    border: 2px solid #e67e22;
+    border-radius: 0;
+    position: relative;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    animation: spritePulse 1s ease-in-out infinite;
+}
+
+.power-up::before {
+    content: '★';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+    font-size: 12px;
+    text-shadow: 1px 1px 0px #e67e22;
+}
+
+/* Pixel Art Health Bar */
+.health-bar {
+    width: 100px;
+    height: 8px;
+    background: #0f3460;
+    border: 2px solid #e94560;
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.health-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #e74c3c, #f39c12);
+    width: 75%;
+    transition: width 0.3s ease;
+}
+
+/* Pixel Art Score Display */
+.score-display {
+    background: #16213e;
+    border: 3px solid #e94560;
+    border-radius: 0;
+    padding: 8px 12px;
+    color: #f39c12;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    text-shadow: 1px 1px 0px #e94560;
+    box-shadow: 
+        0 0 0 1px #0f3460,
+        0 4px 0 0 #e94560;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}

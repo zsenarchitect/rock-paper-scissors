@@ -523,6 +523,187 @@ body {
     animation: pixelLoad 0.5s ease-out;
 }
 
+/* Enhanced Pixel Art Elements */
+.pixel-decoration {
+    position: relative;
+}
+
+.pixel-decoration::before,
+.pixel-decoration::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #f39c12;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.pixel-decoration::before {
+    top: -4px;
+    left: -4px;
+}
+
+.pixel-decoration::after {
+    bottom: -4px;
+    right: -4px;
+}
+
+/* Pixel Art Background Pattern */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(233, 69, 96, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(243, 156, 18, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(15, 52, 96, 0.1) 0%, transparent 50%);
+    background-size: 100px 100px, 150px 150px, 200px 200px;
+    z-index: -1;
+    image-rendering: pixelated;
+}
+
+/* Pixel Art Sprite Styling */
+.pixel-sprite {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    filter: drop-shadow(2px 2px 0px #0f3460);
+}
+
+/* Enhanced Room Cards with Pixel Art */
+.room-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.room-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(45deg, transparent 48%, rgba(243, 156, 18, 0.1) 49%, rgba(243, 156, 18, 0.1) 51%, transparent 52%),
+        linear-gradient(-45deg, transparent 48%, rgba(233, 69, 96, 0.1) 49%, rgba(233, 69, 96, 0.1) 51%, transparent 52%);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Pixel Art Button Effects */
+.vote-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.vote-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(243, 156, 18, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.vote-btn:hover::before {
+    left: 100%;
+}
+
+/* Pixel Art Canvas Enhancement */
+#gameCanvas {
+    position: relative;
+}
+
+#gameCanvas::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(233, 69, 96, 0.1) 2px,
+            rgba(233, 69, 96, 0.1) 4px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 2px,
+            rgba(243, 156, 18, 0.1) 2px,
+            rgba(243, 156, 18, 0.1) 4px
+        );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Pixel Art Chart Enhancement */
+.chart-panel canvas {
+    border: 2px solid #e94560;
+    background: #0f3460;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+/* Pixel Art Stats Enhancement */
+.battle-stats {
+    position: relative;
+}
+
+.battle-stats::before {
+    content: '⚡';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: #f39c12;
+    text-shadow: 2px 2px 0px #e94560;
+    animation: pixelGlow 2s ease-in-out infinite;
+}
+
+/* Pixel Art Team Count Enhancement */
+.team-count {
+    position: relative;
+}
+
+.team-count::before {
+    content: '●';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0.8rem;
+    color: #f39c12;
+    animation: pixelPulse 1s ease-in-out infinite;
+}
+
+/* Pixel Art Header Enhancement */
+.header {
+    position: relative;
+}
+
+.header::after {
+    content: '🎮';
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    animation: pixelBounce 2s ease-in-out infinite;
+}
+
 /* Debug Overlay */
 .debug-overlay {
     position: fixed;

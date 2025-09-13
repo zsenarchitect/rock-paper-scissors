@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rock Paper Scissors Battle Royale</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/pixel-sprites.css">
 </head>
 <body>
     <div id="app">
         <!-- Header -->
-        <header class="header">
+        <header class="header pixel-decoration">
             <h1>🎮 ROCK PAPER SCISSORS BATTLE ROYALE</h1>
             <p>WATCH THE ULTIMATE BATTLE UNFOLD! VOTE TO SUPPORT YOUR TEAM!</p>
         </header>
@@ -18,22 +19,22 @@
         <div class="room-selection">
             <h2>CHOOSE YOUR BATTLE ROOM</h2>
             <div class="rooms-grid">
-                <div class="room-card" data-room="restaurant">
+                <div class="room-card pixel-decoration" data-room="restaurant">
                     <h3>🍔 RESTAURANT WARS</h3>
                     <p>MCDONALD'S VS BURGER KING VS KFC</p>
                     <div class="room-status">LIVE BATTLE</div>
                 </div>
-                <div class="room-card" data-room="ideology">
+                <div class="room-card pixel-decoration" data-room="ideology">
                     <h3>🏛️ IDEOLOGY CLASH</h3>
                     <p>LIBERAL VS CONSERVATIVE VS PROGRESSIVE</p>
                     <div class="room-status">VOTING OPEN</div>
                 </div>
-                <div class="room-card" data-room="brand">
+                <div class="room-card pixel-decoration" data-room="brand">
                     <h3>🥤 BRAND BATTLE</h3>
                     <p>COCA-COLA VS PEPSI VS SPRITE</p>
                     <div class="room-status">STARTING SOON</div>
                 </div>
-                <div class="room-card" data-room="custom">
+                <div class="room-card pixel-decoration" data-room="custom">
                     <h3>🎯 CUSTOM BATTLE</h3>
                     <p>CREATE YOUR OWN BATTLE</p>
                     <div class="room-status">AVAILABLE</div>
@@ -47,24 +48,36 @@
             <div class="game-overlay">
                 <div class="team-counts">
                     <div class="team-count" id="team1-count">
-                        <span class="team-name">Team 1</span>
+                        <span class="team-name">
+                            <span class="team-indicator team-1"></span>TEAM 1
+                        </span>
                         <span class="count">40</span>
                     </div>
                     <div class="team-count" id="team2-count">
-                        <span class="team-name">Team 2</span>
+                        <span class="team-name">
+                            <span class="team-indicator team-2"></span>TEAM 2
+                        </span>
                         <span class="count">40</span>
                     </div>
                     <div class="team-count" id="team3-count">
-                        <span class="team-name">Team 3</span>
+                        <span class="team-name">
+                            <span class="team-indicator team-3"></span>TEAM 3
+                        </span>
                         <span class="count">40</span>
                     </div>
                 </div>
                 <div class="voting-panel">
                     <h3>SUPPORT YOUR TEAM!</h3>
                     <div class="vote-buttons">
-                        <button class="vote-btn" data-team="1">ADD SOLDIER TO TEAM 1</button>
-                        <button class="vote-btn" data-team="2">ADD SOLDIER TO TEAM 2</button>
-                        <button class="vote-btn" data-team="3">ADD SOLDIER TO TEAM 3</button>
+                        <button class="vote-btn" data-team="1">
+                            <span class="rock-sprite"></span> ADD SOLDIER TO TEAM 1
+                        </button>
+                        <button class="vote-btn" data-team="2">
+                            <span class="paper-sprite"></span> ADD SOLDIER TO TEAM 2
+                        </button>
+                        <button class="vote-btn" data-team="3">
+                            <span class="scissors-sprite"></span> ADD SOLDIER TO TEAM 3
+                        </button>
                     </div>
                 </div>
             </div>
@@ -72,30 +85,35 @@
 
         <!-- Live Charts -->
         <div class="charts-container">
-            <div class="chart-panel">
+            <div class="chart-panel pixel-decoration">
                 <h3>LIVE COUNT</h3>
                 <canvas id="pieChart" width="300" height="200"></canvas>
+                <div class="power-up" style="position: absolute; top: 10px; right: 10px;"></div>
             </div>
-            <div class="chart-panel">
+            <div class="chart-panel pixel-decoration">
                 <h3>BATTLE TREND</h3>
                 <canvas id="trendChart" width="400" height="200"></canvas>
+                <div class="score-display" style="position: absolute; bottom: 10px; right: 10px;">SCORE: 999</div>
             </div>
         </div>
 
         <!-- Battle Info -->
         <div class="battle-info">
-            <div class="battle-stats">
+            <div class="battle-stats pixel-decoration">
                 <div class="stat">
                     <span class="label">BATTLE TIME:</span>
                     <span class="value" id="battle-time">00:00</span>
+                    <div class="health-bar" style="margin-top: 8px;"></div>
                 </div>
                 <div class="stat">
                     <span class="label">TOTAL CONVERSIONS:</span>
                     <span class="value" id="total-conversions">0</span>
+                    <div class="power-up" style="margin: 8px auto; display: block;"></div>
                 </div>
                 <div class="stat">
                     <span class="label">ACTIVE PLAYERS:</span>
                     <span class="value" id="active-players">0</span>
+                    <div class="score-display" style="margin-top: 8px; font-size: 0.5rem;">PLAYERS ONLINE</div>
                 </div>
             </div>
         </div>
