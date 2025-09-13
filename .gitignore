@@ -105,6 +105,15 @@ venv/
 env/
 ENV/
 
-# Temporary files
+# Temporary files and directories
 tmp/
 temp/
+*.tmp
+*.temp
+debug_*
+test_*
+*_test
+*.debug
+*.log
+*.trace
+*.dump

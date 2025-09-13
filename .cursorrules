@@ -1,0 +1,250 @@
+# Rock Paper Scissors Battle Royale - Cursor IDE Rules
+
+## 🧹 CLEANUP RULES
+- ALWAYS cleanup debug and test files after use
+- Remove temporary files created during development
+- Clean up console.log statements before committing
+- Remove unused imports and variables
+- Delete test data files after testing
+
+## 📁 FILE ORGANIZATION RULES
+- Keep entry scripts lean and focused
+- Use modular design with clear separation of concerns
+- Do NOT pollute the root folder with unnecessary files
+- Place files in appropriate subdirectories based on purpose
+
+## 🏗️ PROJECT STRUCTURE RULES
+
+### Root Directory - ONLY Essential Files
+```
+/ (root)
+├── README.md                    # Project documentation
+├── .gitignore                   # Git ignore rules
+├── .cursorrules                 # This file
+├── requirements.txt             # Python dependencies
+├── setup.py                     # Python package setup
+├── install.sh                   # Installation script
+├── activate.sh                  # Environment activation
+└── verify-phase1.py            # Phase verification script
+```
+
+### Development Files - Organize by Purpose
+```
+/ (root)
+├── docs/                        # GitHub Pages (Production)
+├── ai_training/                 # AI Training Platform
+├── .venv/                       # Virtual Environment (Hidden)
+└── temp/                        # Temporary files (Git ignored)
+```
+
+## 🚫 FORBIDDEN IN ROOT DIRECTORY
+- Debug files (*.debug, *.log, debug_*)
+- Test files (*.test, test_*, *_test)
+- Temporary files (*.tmp, *.temp, temp_*)
+- Cache files (*.cache, cache_*)
+- Backup files (*.bak, *.backup, backup_*)
+- IDE files (.vscode/, .idea/, *.swp, *.swo)
+- OS files (.DS_Store, Thumbs.db)
+- Build artifacts (dist/, build/, out/)
+
+## ✅ REQUIRED FILE PLACEMENT
+
+### Debug & Test Files
+```
+temp/
+├── debug/                       # Debug files
+├── tests/                       # Test files
+├── logs/                        # Log files
+└── cache/                       # Cache files
+```
+
+### Entry Scripts - Keep Lean
+- Main entry points should be minimal
+- Delegate functionality to modules
+- Use clear, descriptive names
+- Include only essential imports
+
+### Modular Design Principles
+- One responsibility per module
+- Clear interfaces between modules
+- Minimal coupling, maximum cohesion
+- Use dependency injection where possible
+
+## 🔧 CURSOR IDE SPECIFIC RULES
+
+### Code Generation
+- Generate code in appropriate subdirectories
+- Use existing module patterns
+- Follow established naming conventions
+- Maintain consistent code style
+
+### File Creation
+- Always check if file belongs in root before creating
+- Use descriptive, purpose-driven names
+- Create necessary parent directories
+- Update .gitignore for new file types
+
+### Refactoring
+- Move misplaced files to correct directories
+- Update imports when moving files
+- Maintain backward compatibility
+- Update documentation for structural changes
+
+## 📝 NAMING CONVENTIONS
+
+### Files
+- Use kebab-case for HTML/CSS: `game-ui.css`
+- Use camelCase for JavaScript: `gameEngine.js`
+- Use snake_case for Python: `genetic_algorithm.py`
+- Use PascalCase for classes: `GameEngine`
+
+### Directories
+- Use kebab-case: `ai-training/`
+- Use descriptive names: `visualization/`
+- Avoid abbreviations: `utils/` not `util/`
+
+## 🧪 TESTING RULES
+
+### Test File Organization
+```
+temp/tests/
+├── unit/                        # Unit tests
+├── integration/                 # Integration tests
+├── e2e/                         # End-to-end tests
+└── fixtures/                    # Test data
+```
+
+### Test Cleanup
+- Remove test files after completion
+- Clean up test data
+- Reset test environment
+- Remove temporary test artifacts
+
+## 🐛 DEBUGGING RULES
+
+### Debug File Management
+```
+temp/debug/
+├── logs/                        # Debug logs
+├── dumps/                       # Memory dumps
+├── traces/                      # Execution traces
+└── reports/                     # Debug reports
+```
+
+### Debug Cleanup
+- Remove debug files after fixing issues
+- Clean up debug logs
+- Remove temporary debug code
+- Reset debug environment
+
+## 📊 LOGGING RULES
+
+### Log File Organization
+```
+temp/logs/
+├── application/                 # Application logs
+├── errors/                      # Error logs
+├── performance/                 # Performance logs
+└── audit/                       # Audit logs
+```
+
+### Log Cleanup
+- Rotate log files regularly
+- Remove old log files
+- Compress archived logs
+- Monitor log file sizes
+
+## 🔄 WORKFLOW RULES
+
+### Before Committing
+1. Run cleanup script
+2. Remove temporary files
+3. Clean up debug code
+4. Update documentation
+5. Run verification tests
+
+### After Testing
+1. Remove test artifacts
+2. Clean up test data
+3. Reset test environment
+4. Update test documentation
+
+### After Debugging
+1. Remove debug files
+2. Clean up debug logs
+3. Remove temporary code
+4. Document fixes
+
+## 🚀 DEPLOYMENT RULES
+
+### Production Build
+- Exclude debug files
+- Remove test files
+- Clean up temporary files
+- Optimize for production
+
+### Development Build
+- Include necessary debug tools
+- Keep test files accessible
+- Maintain development environment
+- Document development setup
+
+## 📋 MAINTENANCE RULES
+
+### Regular Cleanup
+- Weekly: Remove old temporary files
+- Monthly: Clean up debug artifacts
+- Quarterly: Review file organization
+- Annually: Refactor if needed
+
+### File Monitoring
+- Monitor root directory for pollution
+- Check for misplaced files
+- Verify proper organization
+- Update rules as needed
+
+## 🎯 QUALITY GATES
+
+### Before Merge
+- All temporary files removed
+- Debug code cleaned up
+- Files in correct directories
+- Documentation updated
+
+### Before Release
+- Production build clean
+- No debug artifacts
+- Proper file organization
+- All tests passing
+
+## 📚 DOCUMENTATION RULES
+
+### Keep Updated
+- Update README for structural changes
+- Document new file organization
+- Maintain architecture documentation
+- Keep rules current
+
+### File Documentation
+- Document file purposes
+- Explain directory structures
+- Maintain change logs
+- Keep documentation clean
+
+---
+
+## 🚨 VIOLATION HANDLING
+
+### Immediate Actions
+1. Move misplaced files to correct directories
+2. Remove temporary files
+3. Clean up debug artifacts
+4. Update .gitignore if needed
+
+### Prevention
+1. Use file templates
+2. Follow naming conventions
+3. Regular cleanup checks
+4. Automated cleanup scripts
+
+Remember: Clean code is maintainable code. Keep the project organized and professional! 🎮
