@@ -60,7 +60,8 @@ def check_directory_structure():
         "ai_training/scripts/",
         "ai_training/data/",
         ".venv/",
-        "temp/"
+        "temp/",
+        "DEBUG/"
     ]
     
     missing_dirs = []
@@ -96,16 +97,20 @@ def check_file_organization():
     else:
         print("✅ No test files in root directory")
     
-    # Check that debug files are in temp/debug/
+    # Check that debug files are in DEBUG/ (excluding entry scripts)
     debug_files_in_root = []
+    entry_scripts = ["debug-helper.sh", "cleanup.sh", "dev-workflow.sh", "activate.sh", "install.sh"]
+    
     for file in os.listdir("."):
         if os.path.isfile(file) and ("debug" in file.lower() or file.endswith(".debug")):
-            debug_files_in_root.append(file)
+            # Skip entry scripts
+            if file not in entry_scripts:
+                debug_files_in_root.append(file)
     
     if debug_files_in_root:
         print("❌ Debug files found in root directory:")
         for file in debug_files_in_root:
-            print(f"  - {file} (should be in temp/debug/)")
+            print(f"  - {file} (should be in DEBUG/)")
         return False
     else:
         print("✅ No debug files in root directory")

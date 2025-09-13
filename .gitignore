@@ -108,6 +108,11 @@ ENV/
 # Temporary files and directories
 tmp/
 temp/
+
+# Debug folder (not git-tracked)
+DEBUG/
+
+# Temporary files
 *.tmp
 *.temp
 debug_*

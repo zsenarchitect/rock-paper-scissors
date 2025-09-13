@@ -34,7 +34,8 @@
 ├── docs/                        # GitHub Pages (Production)
 ├── ai_training/                 # AI Training Platform
 ├── .venv/                       # Virtual Environment (Hidden)
-└── temp/                        # Temporary files (Git ignored)
+├── temp/                        # Temporary files (Git ignored)
+└── DEBUG/                       # Debug files (Git ignored)
 ```
 
 ## 🚫 FORBIDDEN IN ROOT DIRECTORY
@@ -124,11 +125,14 @@ temp/tests/
 
 ### Debug File Management
 ```
-temp/debug/
+DEBUG/
 ├── logs/                        # Debug logs
 ├── dumps/                       # Memory dumps
 ├── traces/                      # Execution traces
-└── reports/                     # Debug reports
+├── reports/                     # Debug reports
+├── screenshots/                 # Debug screenshots
+├── recordings/                  # Debug recordings
+└── analysis/                    # Debug analysis files
 ```
 
 ### Debug Cleanup

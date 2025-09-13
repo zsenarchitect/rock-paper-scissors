@@ -8,10 +8,6 @@ echo "=================================================="
 
 # Create temp directory structure if it doesn't exist
 echo "📁 Creating temp directory structure..."
-mkdir -p temp/debug/logs
-mkdir -p temp/debug/dumps
-mkdir -p temp/debug/traces
-mkdir -p temp/debug/reports
 mkdir -p temp/tests/unit
 mkdir -p temp/tests/integration
 mkdir -p temp/tests/e2e
@@ -21,6 +17,16 @@ mkdir -p temp/logs/errors
 mkdir -p temp/logs/performance
 mkdir -p temp/logs/audit
 mkdir -p temp/cache
+
+# Create DEBUG directory structure if it doesn't exist
+echo "🐛 Creating DEBUG directory structure..."
+mkdir -p DEBUG/logs
+mkdir -p DEBUG/dumps
+mkdir -p DEBUG/traces
+mkdir -p DEBUG/reports
+mkdir -p DEBUG/screenshots
+mkdir -p DEBUG/recordings
+mkdir -p DEBUG/analysis
 
 # Clean up debug files from root
 echo "🐛 Cleaning up debug files..."
@@ -91,9 +97,9 @@ find . -name ".parcel-cache" -type d -exec rm -rf {} + 2>/dev/null || true
 # Move misplaced files to temp directory
 echo "📦 Moving misplaced files to temp directory..."
 
-# Move debug files
-find . -maxdepth 1 -name "debug_*" -exec mv {} temp/debug/ \; 2>/dev/null || true
-find . -maxdepth 1 -name "*.debug" -exec mv {} temp/debug/ \; 2>/dev/null || true
+# Move debug files to DEBUG directory
+find . -maxdepth 1 -name "debug_*" -exec mv {} DEBUG/ \; 2>/dev/null || true
+find . -maxdepth 1 -name "*.debug" -exec mv {} DEBUG/ \; 2>/dev/null || true
 
 # Move test files
 find . -maxdepth 1 -name "test_*" -exec mv {} temp/tests/ \; 2>/dev/null || true
@@ -130,7 +136,7 @@ fi
 echo ""
 echo "📊 Cleanup Summary:"
 echo "=================="
-echo "✅ Debug files cleaned up"
+echo "✅ Debug files cleaned up and moved to DEBUG/"
 echo "✅ Test files cleaned up"
 echo "✅ Temporary files cleaned up"
 echo "✅ Backup files cleaned up"
