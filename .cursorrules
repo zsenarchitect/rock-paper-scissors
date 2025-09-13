@@ -195,6 +195,7 @@ temp/tests/
 ```
 DEBUG/
 ├── logs/                        # Debug logs
+│   └── action-monitoring/        # GitHub Actions monitoring logs
 ├── dumps/                       # Memory dumps
 ├── traces/                      # Execution traces
 ├── reports/                     # Debug reports
@@ -202,6 +203,14 @@ DEBUG/
 ├── recordings/                  # Debug recordings
 └── analysis/                    # Debug analysis files
 ```
+
+### Debug Features for Better Debugging
+- **Action Monitoring**: Real-time GitHub Actions workflow monitoring with detailed failure logs
+- **Timezone-Aware Filtering**: Monitor only recent workflows (last 10 minutes) to focus on current issues
+- **Smart Exit Logic**: Exits immediately when no workflows are running/queued
+- **Detailed Logging**: Comprehensive logs saved to `DEBUG/logs/action-monitoring/`
+- **Failure Analysis**: Automatic collection of failed workflow logs with run details
+- **Status Summaries**: Clear visual status reports with success/failure counts
 
 ### Debug Cleanup
 - Remove debug files after fixing issues
@@ -228,12 +237,42 @@ temp/logs/
 
 ## 🔄 WORKFLOW RULES
 
+### Main Branch Protection (CRITICAL)
+- **MANDATORY**: Before ANY commit to main branch, run `./.github/_local_action_monitor main`
+- **MANDATORY**: Before ANY merge to main branch, run `./.github/_local_action_monitor main`
+- **FAIL-SAFE**: If any GitHub Action fails, DO NOT proceed with main branch operations
+- **VERIFICATION**: All CI/CD pipelines must be green before main branch changes
+- **MONITORING**: Wait for ALL workflows to complete before proceeding
+- **⚠️ WARNING**: Violating this rule may break the build and cause deployment issues
+
+### GitHub Actions Monitoring
+- **Local Action Monitor**: Use `./.github/_local_action_monitor [commit] [max-wait-minutes]` to monitor workflow runs
+- **Quick Status Check**: Use `./.github/scripts/quick-check.sh [commit]` for immediate status
+- **Monitor Behavior**: 
+  - Filters for workflows from last 10 minutes only
+  - Exits immediately if no recent workflows found
+  - Collects detailed logs from failed runs
+  - Waits until ALL workflows complete (success or failure)
+- **Usage Examples**:
+  - `./.github/_local_action_monitor main 30` - Monitor main branch for up to 30 minutes
+  - `./.github/_local_action_monitor` - Monitor main branch for up to 60 minutes (default)
+  - `./.github/scripts/quick-check.sh` - Quick status check without waiting
+
 ### Before Committing
-1. Run cleanup script
-2. Remove temporary files
-3. Clean up debug code
-4. Update documentation
-5. Run verification tests
+1. Run local action monitor to check workflow status
+2. Run cleanup script
+3. Remove temporary files
+4. Clean up debug code
+5. Update documentation
+6. Run verification tests
+
+### Main Branch Protection Rules
+- **ALWAYS run local action monitor** before committing to main branch
+- **ALWAYS run local action monitor** before merging PRs to main branch
+- **MANDATORY**: Use `./.github/_local_action_monitor main [max-wait-minutes]` to ensure all actions are passing
+- **FAIL-SAFE**: If any action fails, DO NOT commit/merge until all issues are resolved
+- **MONITORING**: Wait for ALL workflows to complete (success or failure) before proceeding
+- **VERIFICATION**: Confirm all CI/CD pipelines are green before main branch operations
 
 ### After Testing
 1. Remove test artifacts

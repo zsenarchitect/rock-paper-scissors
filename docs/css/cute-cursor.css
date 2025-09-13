@@ -1,0 +1,301 @@
+/* Cute Cursor - OpenAI Agent Style */
+
+/* Hide default cursor */
+* {
+    cursor: none !important;
+}
+
+/* Cute Cursor Base */
+.cute-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #ff6b9d, #ff8fab, #ffa8c5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: all 0.1s ease;
+    box-shadow: 
+        0 0 0 3px rgba(255, 107, 157, 0.3),
+        0 0 0 6px rgba(255, 107, 157, 0.1),
+        0 4px 12px rgba(255, 107, 157, 0.4);
+    transform: translate(-50%, -50%);
+}
+
+/* Cute Cursor Eyes */
+.cute-cursor::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 4px;
+    height: 4px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.cute-cursor::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 4px;
+    height: 4px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* Cute Cursor Hover States */
+.cute-cursor.hover {
+    transform: translate(-50%, -50%) scale(1.3);
+    background: linear-gradient(135deg, #4ecdc4, #44a08d, #093637);
+    box-shadow: 
+        0 0 0 4px rgba(78, 205, 196, 0.3),
+        0 0 0 8px rgba(78, 205, 196, 0.1),
+        0 6px 16px rgba(78, 205, 196, 0.4);
+}
+
+.cute-cursor.click {
+    transform: translate(-50%, -50%) scale(0.8);
+    background: linear-gradient(135deg, #ff9a56, #ffad7a, #ffc19e);
+    box-shadow: 
+        0 0 0 2px rgba(255, 154, 86, 0.3),
+        0 0 0 4px rgba(255, 154, 86, 0.1),
+        0 2px 8px rgba(255, 154, 86, 0.4);
+}
+
+.cute-cursor.drag {
+    transform: translate(-50%, -50%) scale(1.1) rotate(15deg);
+    background: linear-gradient(135deg, #a8e6cf, #88d8a3, #68c87a);
+    box-shadow: 
+        0 0 0 3px rgba(168, 230, 207, 0.3),
+        0 0 0 6px rgba(168, 230, 207, 0.1),
+        0 4px 12px rgba(168, 230, 207, 0.4);
+}
+
+/* Cute Cursor Trail */
+.cursor-trail {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.6;
+    transform: translate(-50%, -50%);
+    animation: trailFade 0.5s ease-out forwards;
+}
+
+@keyframes trailFade {
+    0% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+}
+
+/* Cute Cursor Pulse Animation */
+@keyframes cursorPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 
+            0 0 0 3px rgba(255, 107, 157, 0.3),
+            0 0 0 6px rgba(255, 107, 157, 0.1),
+            0 4px 12px rgba(255, 107, 157, 0.4);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 
+            0 0 0 4px rgba(255, 107, 157, 0.4),
+            0 0 0 8px rgba(255, 107, 157, 0.2),
+            0 6px 16px rgba(255, 107, 157, 0.5);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 
+            0 0 0 3px rgba(255, 107, 157, 0.3),
+            0 0 0 6px rgba(255, 107, 157, 0.1),
+            0 4px 12px rgba(255, 107, 157, 0.4);
+    }
+}
+
+.cute-cursor.idle {
+    animation: cursorPulse 2s ease-in-out infinite;
+}
+
+/* Cute Cursor Wink Animation */
+@keyframes cursorWink {
+    0% { transform: translate(-50%, -50%) scaleY(1); }
+    50% { transform: translate(-50%, -50%) scaleY(0.1); }
+    100% { transform: translate(-50%, -50%) scaleY(1); }
+}
+
+.cute-cursor.wink {
+    animation: cursorWink 0.3s ease-in-out;
+}
+
+/* Cute Cursor Happy Animation */
+@keyframes cursorHappy {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    25% { transform: translate(-50%, -50%) rotate(-10deg); }
+    75% { transform: translate(-50%, -50%) rotate(10deg); }
+    100% { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+.cute-cursor.happy {
+    animation: cursorHappy 0.5s ease-in-out;
+}
+
+/* Cute Cursor Excited Animation */
+@keyframes cursorExcited {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    25% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); }
+    50% { transform: translate(-50%, -50%) scale(0.9) rotate(-5deg); }
+    75% { transform: translate(-50%, -50%) scale(1.1) rotate(3deg); }
+    100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+}
+
+.cute-cursor.excited {
+    animation: cursorExcited 0.6s ease-in-out;
+}
+
+/* Cute Cursor Sleepy Animation */
+@keyframes cursorSleepy {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(0.8); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.cute-cursor.sleepy {
+    animation: cursorSleepy 1s ease-in-out infinite;
+    opacity: 0.7;
+}
+
+/* Cute Cursor Special States */
+.cute-cursor.loading {
+    background: linear-gradient(135deg, #ffd93d, #ff6b6b, #4ecdc4);
+    animation: cursorExcited 0.8s ease-in-out infinite;
+}
+
+.cute-cursor.success {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    animation: cursorHappy 0.5s ease-in-out;
+}
+
+.cute-cursor.error {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    animation: cursorExcited 0.3s ease-in-out 3;
+}
+
+/* Cute Cursor for Different Elements */
+.cute-cursor.button-hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.cute-cursor.link-hover {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.cute-cursor.text-hover {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    transform: translate(-50%, -50%) scale(0.9);
+}
+
+/* Cute Cursor Responsive */
+@media (max-width: 768px) {
+    .cute-cursor {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .cute-cursor::before,
+    .cute-cursor::after {
+        width: 3px;
+        height: 3px;
+    }
+}
+
+/* Cute Cursor Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .cute-cursor {
+        animation: none;
+        transition: none;
+    }
+    
+    .cursor-trail {
+        display: none;
+    }
+}
+
+/* Special Game Interactions */
+.room-card:hover + .cute-cursor {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: translate(-50%, -50%) scale(1.3);
+}
+
+.vote-btn:hover + .cute-cursor {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+#gameCanvas:hover + .cute-cursor {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Cute Cursor for Pixel Art Elements */
+.pixel-sprite:hover + .cute-cursor {
+    background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+    transform: translate(-50%, -50%) scale(1.4);
+}
+
+/* Cute Cursor for Interactive Elements */
+button:hover + .cute-cursor,
+.vote-btn:hover + .cute-cursor,
+.room-card:hover + .cute-cursor {
+    animation: cursorExcited 0.3s ease-in-out;
+}
+
+/* Cute Cursor Loading State */
+.cute-cursor.loading::before,
+.cute-cursor.loading::after {
+    animation: blink 0.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Cute Cursor Success State */
+.cute-cursor.success::before,
+.cute-cursor.success::after {
+    background: #4ecdc4;
+    animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+/* Cute Cursor Error State */
+.cute-cursor.error::before,
+.cute-cursor.error::after {
+    background: #ff6b6b;
+    animation: shake 0.3s ease-in-out 3;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+}

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Cursor Workflow Command
+# Usage: cursor-workflow <issue-number> [merge]
+
+# Check if we're in the right directory
+if [ ! -f ".cursorrules-workflow" ]; then
+    echo "❌ Error: .cursorrules-workflow not found. Please run this from the project root."
+    exit 1
+fi
+
+# Check if issue number is provided
+if [ $# -eq 0 ]; then
+    echo "🎯 Cursor Workflow for Issue Management"
+    echo ""
+    echo "Usage: cursor-workflow <issue-number> [merge]"
+    echo ""
+    echo "Examples:"
+    echo "  cursor-workflow 1        # Work on issue #1, create PR, leave open"
+    echo "  cursor-workflow 5 merge  # Work on issue #5, create PR, and merge"
+    echo "  cursor-workflow 12 with merge  # Work on issue #12, create PR, and merge"
+    echo ""
+    echo "Available issues:"
+    gh issue list --state open --json number,title --jq '.[] | "  #\(.number): \(.title)"'
+    exit 1
+fi
+
+ISSUE_NUMBER=$1
+MERGE_OPTION=""
+
+# Parse merge option
+if [ "$2" = "merge" ] || [ "$3" = "merge" ]; then
+    MERGE_OPTION="merge"
+fi
+
+echo "🎮 Starting Cursor Workflow for Issue #$ISSUE_NUMBER"
+echo ""
+
+# Run the workflow script
+./scripts/work-on-issue.sh $ISSUE_NUMBER $MERGE_OPTION
+
+echo ""
+echo "🎯 Workflow completed! You can now:"
+echo "  1. Start implementing the solution"
+echo "  2. Use 'cursor' to open in Cursor IDE"
+echo "  3. Follow the TODO list for step-by-step guidance"
+echo ""
+echo "Happy coding! 🚀"

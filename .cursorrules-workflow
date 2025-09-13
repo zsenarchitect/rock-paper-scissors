@@ -1,0 +1,301 @@
+# Cursor Workflow Rules for Issue Management
+
+## 🎯 ISSUE WORKFLOW COMMANDS
+
+### Primary Command: `work on issue X with option (merge optional)`
+
+When you receive this command, follow this exact workflow:
+
+#### 1. **Issue Analysis Phase**
+```bash
+# Check issue details
+gh issue view X
+
+# Analyze issue description, labels, and priority
+# Determine if it's urgent, bug, feature, enhancement, etc.
+# Check if issue has clear requirements or needs clarification
+```
+
+#### 2. **Branch Creation Phase**
+```bash
+# Create dedicated branch based on issue type and number
+git checkout -b feature/issue-X-description
+# OR
+git checkout -b bugfix/issue-X-description
+# OR
+git checkout -b enhancement/issue-X-description
+```
+
+#### 3. **Implementation Phase**
+- **Always create a TODO list** using `todo_write` tool
+- **Break down the task** into specific, actionable items
+- **Implement the solution** step by step
+- **Follow existing code patterns** and conventions
+- **Add comprehensive comments** and documentation
+- **Test thoroughly** before committing
+
+#### 4. **Testing Phase**
+- **Run local tests** to verify functionality
+- **Check for linting errors** using `read_lints`
+- **Test in browser** if it's a frontend change
+- **Verify no regressions** in existing functionality
+
+#### 5. **Commit Phase**
+```bash
+# Stage all changes
+git add .
+
+# Create descriptive commit message
+git commit -m "feat/fix/enhance: brief description for issue #X
+
+- Detailed bullet points of changes
+- Any breaking changes or important notes
+- Testing performed
+- Dependencies updated
+
+Resolves #X"
+```
+
+#### 6. **Push and PR Creation**
+```bash
+# Push branch to remote
+git push -u origin feature/issue-X-description
+
+# Create pull request
+gh pr create --title "feat/fix/enhance: description for issue #X" --body "## Description
+
+Brief description of what was implemented.
+
+## Changes Made
+- List of specific changes
+- Any new features added
+- Bug fixes implemented
+- Performance improvements
+
+## Testing
+- How the changes were tested
+- Any manual testing performed
+- Browser/device testing if applicable
+
+## Screenshots/Videos
+- Include visual evidence if UI changes
+
+Resolves #X"
+```
+
+#### 7. **Optional Merge Phase**
+```bash
+# If merge is requested or issue is urgent
+gh pr merge --squash --delete-branch
+
+# If merge is not requested, leave PR open for review
+# Add comment to PR about status
+gh pr comment --body "PR ready for review. Changes implemented and tested."
+```
+
+## 🔄 WORKFLOW AUTOMATION RULES
+
+### Issue Type Detection
+- **Bug**: `bugfix/issue-X-fix-description`
+- **Feature**: `feature/issue-X-add-description`
+- **Enhancement**: `enhancement/issue-X-improve-description`
+- **Urgent**: `hotfix/issue-X-urgent-description`
+
+### Branch Naming Convention
+```bash
+# Format: {type}/issue-{number}-{kebab-case-description}
+feature/issue-1-cute-cursor
+bugfix/issue-5-fix-audio-loading
+enhancement/issue-12-improve-performance
+hotfix/issue-3-urgent-security-fix
+```
+
+### Commit Message Format
+```bash
+# Format: {type}: {brief description} for issue #{number}
+feat: implement cute cursor for issue #1
+fix: resolve audio loading bug for issue #5
+enhance: improve performance for issue #12
+```
+
+### PR Title Format
+```bash
+# Format: {type}: {description} for issue #{number}
+feat: implement cute cursor for issue #1
+fix: resolve audio loading bug for issue #5
+enhance: improve performance for issue #12
+```
+
+## 🎯 WORKFLOW EXECUTION STEPS
+
+### Step 1: Issue Analysis
+1. Use `gh issue view X` to get issue details
+2. Analyze description, labels, and comments
+3. Determine issue type and priority
+4. Check if requirements are clear
+5. Create TODO list with `todo_write`
+
+### Step 2: Branch Management
+1. Create appropriate branch name
+2. Switch to new branch
+3. Update TODO list with branch creation
+
+### Step 3: Implementation
+1. Implement solution step by step
+2. Follow existing code patterns
+3. Add comprehensive comments
+4. Test each change
+5. Update TODO list with progress
+
+### Step 4: Quality Assurance
+1. Run linting checks
+2. Test functionality thoroughly
+3. Verify no regressions
+4. Update TODO list with testing
+
+### Step 5: Version Control
+1. Stage all changes
+2. Create descriptive commit
+3. Push to remote
+4. Update TODO list with commit
+
+### Step 6: Pull Request
+1. Create PR with detailed description
+2. Include screenshots if UI changes
+3. Reference issue number
+4. Update TODO list with PR creation
+
+### Step 7: Optional Merge
+1. **CRITICAL**: Run action monitor before merging to main: `./.github/_local_action_monitor main`
+2. Check if merge is requested
+3. **FAIL-SAFE**: If any action fails, DO NOT merge until resolved
+4. Merge if urgent or requested AND all actions are passing
+5. Add appropriate comments
+6. Update TODO list with merge status
+
+## 🚨 ERROR HANDLING
+
+### If Issue Description is Unclear
+1. Add comment to issue asking for clarification
+2. Wait for response or make reasonable assumptions
+3. Document assumptions in PR description
+
+### If Implementation Fails
+1. Revert changes
+2. Create new branch with different approach
+3. Document what was tried and why it failed
+4. Ask for help if needed
+
+### If Tests Fail
+1. Fix failing tests
+2. Add new tests if needed
+3. Ensure all tests pass before committing
+4. Document test coverage in PR
+
+## 📋 TODO LIST TEMPLATE
+
+```javascript
+// Always start with this structure
+todo_write({
+    merge: false,
+    todos: [
+        {id: 'analyze_issue', content: 'Analyze issue X requirements', status: 'in_progress'},
+        {id: 'create_branch', content: 'Create dedicated branch for issue X', status: 'pending'},
+        {id: 'implement_solution', content: 'Implement solution for issue X', status: 'pending'},
+        {id: 'test_implementation', content: 'Test the implementation', status: 'pending'},
+        {id: 'commit_changes', content: 'Commit changes for issue X', status: 'pending'},
+        {id: 'create_pr', content: 'Create pull request for issue X', status: 'pending'},
+        {id: 'optional_merge', content: 'Merge PR if requested', status: 'pending'}
+    ]
+});
+```
+
+## 🎮 SPECIAL CASES
+
+### Urgent Issues
+- Use `hotfix/` prefix
+- Skip some testing if critical
+- Merge immediately after PR creation
+- Notify team of urgent fix
+
+### UI/UX Issues
+- Always test in multiple browsers
+- Include before/after screenshots
+- Test responsive design
+- Verify accessibility
+
+### Backend Issues
+- Test API endpoints
+- Verify database changes
+- Check error handling
+- Test performance impact
+
+### Documentation Issues
+- Update relevant docs
+- Check for broken links
+- Verify accuracy
+- Test examples
+
+## 🔧 WORKFLOW COMMANDS
+
+### Quick Issue Check
+```bash
+# Check issue status
+gh issue view X --json state,title,labels,assignees
+
+# List all open issues
+gh issue list --state open
+
+# Check PR status
+gh pr list --head feature/issue-X-description
+```
+
+### Branch Management
+```bash
+# List all branches
+git branch -a
+
+# Delete local branch after merge
+git branch -d feature/issue-X-description
+
+# Delete remote branch
+git push origin --delete feature/issue-X-description
+```
+
+### PR Management
+```bash
+# Check PR status
+gh pr view feature/issue-X-description
+
+# Add comment to PR
+gh pr comment --body "Status update: Ready for review"
+
+# Merge PR
+gh pr merge --squash --delete-branch
+```
+
+## 📝 WORKFLOW COMPLETION CHECKLIST
+
+- [ ] Issue analyzed and understood
+- [ ] Branch created with proper naming
+- [ ] Solution implemented and tested
+- [ ] All tests passing
+- [ ] Code linted and clean
+- [ ] Changes committed with descriptive message
+- [ ] Branch pushed to remote
+- [ ] PR created with detailed description
+- [ ] **CRITICAL**: Action monitor run before merge: `./.github/_local_action_monitor main`
+- [ ] All GitHub Actions passing (green status)
+- [ ] PR merged if requested AND actions are passing
+- [ ] TODO list completed
+- [ ] Cleanup performed (delete branches if merged)
+
+## 🎯 SUCCESS METRICS
+
+- Issue resolved completely
+- Code follows project conventions
+- Tests pass and coverage maintained
+- Documentation updated if needed
+- PR approved and merged
+- No regressions introduced
+- Clean git history maintained
