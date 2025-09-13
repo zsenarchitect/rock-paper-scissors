@@ -198,7 +198,7 @@ jobs:
   container-security:
     name: 🐳 Container Security
     runs-on: ubuntu-latest
-    if: hashFiles('Dockerfile*') != ''
+    if: ${{ contains(github.event.head_commit.modified, 'Dockerfile') || contains(github.event.head_commit.added, 'Dockerfile') }}
     
     steps:
     - name: 📥 Checkout code
