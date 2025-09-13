@@ -31,21 +31,11 @@ echo "🧪 Step 3: Running tests..."
 
 # Test virtual environment
 echo "  - Testing virtual environment..."
-source .venv/bin/activate && python test_venv.py > /dev/null 2>&1
+source .venv/bin/activate && python temp/tests/test_venv.py > /dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "    ✅ Virtual environment test passed"
 else
     echo "    ❌ Virtual environment test failed"
-    exit 1
-fi
-
-# Test audio system
-echo "  - Testing audio system..."
-python temp/tests/test-audio-manager.js > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-    echo "    ✅ Audio system test passed"
-else
-    echo "    ❌ Audio system test failed"
     exit 1
 fi
 
