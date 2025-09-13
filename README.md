@@ -2,6 +2,8 @@
 
 **An AI Training Platform & Crowd Engagement Game**
 
+🌐 **[Live Demo](https://zsenarchitect.github.io/rock-paper-scissors/)** | 📊 **[Project Board](https://github.com/users/zsenarchitect/projects/5)** | 🐛 **[Issues](https://github.com/zsenarchitect/rock-paper-scissors/issues)**
+
 A revolutionary platform that combines AI training, crowd engagement, and local business partnerships through an intense Rock Paper Scissors battle simulation. Watch AI strategies evolve in real-time while users vote, engage, and support their teams.
 
 ## 💡 Business Concept

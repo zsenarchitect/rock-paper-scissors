@@ -55,7 +55,7 @@ All workflows now include:
 
 ## 📋 Workflow Overview
 
-### 🧪 CI (Continuous Integration) - `ci.yml`
+### 🧪 Test and Build - `test-and-build.yml`
 **Triggers:** Push to main/develop, Pull Requests
 **Purpose:** Comprehensive testing and validation
 
@@ -68,7 +68,7 @@ All workflows now include:
 - **Performance Testing**: Basic performance benchmarks
 - **Build & Package**: Create build artifacts
 
-### 🚀 CD (Continuous Deployment) - `cd.yml`
+### 🚀 Deploy to GitHub Pages - `deploy-to-github-pages.yml`
 **Triggers:** Push to main, Manual dispatch
 **Purpose:** Automated deployment to different environments
 
@@ -79,7 +79,7 @@ All workflows now include:
 - **Deploy to Production**: Manual production deployment
 - **Health Check**: Post-deployment verification
 
-### 🔄 Phase Migration - `phase-migration.yml`
+### 🔄 Architecture Migration - `architecture-migration.yml`
 **Triggers:** Manual dispatch only
 **Purpose:** Automated migration between development phases
 
@@ -90,7 +90,7 @@ All workflows now include:
 - **Phase 2 → Microservices**: Create microservices architecture
 - **Full Migration**: Complete phase migration
 
-### 🔒 Security & Quality - `security.yml`
+### 🔒 Security and Quality Scan - `security-and-quality-scan.yml`
 **Triggers:** Push to main/develop, PRs, Weekly schedule, Manual
 **Purpose:** Comprehensive security and quality assurance
 
@@ -101,7 +101,7 @@ All workflows now include:
 - **License Check**: License compatibility verification
 - **Container Security**: Docker security scanning (if applicable)
 
-### ⚡ Performance Testing - `performance.yml`
+### ⚡ Performance Testing and Monitoring - `performance-testing-and-monitoring.yml`
 **Triggers:** Push to main/develop, PRs, Weekly schedule, Manual
 **Purpose:** Performance testing and monitoring
 
@@ -154,10 +154,10 @@ All workflows now include:
 ### Manual Workflow Triggers
 ```bash
 # Trigger specific workflows
-gh workflow run ci.yml
-gh workflow run cd.yml --ref main
-gh workflow run phase-migration.yml --field phase=phase1-to-typescript
-gh workflow run performance.yml --field test-type=all
+gh workflow run test-and-build.yml
+gh workflow run deploy-to-github-pages.yml --ref main
+gh workflow run architecture-migration.yml --field phase=phase1-to-typescript
+gh workflow run performance-testing-and-monitoring.yml --field test-type=all
 gh workflow run cleanup.yml --field cleanup-type=all
 ```
 
