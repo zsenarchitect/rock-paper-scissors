@@ -47,6 +47,11 @@
 - **`create repo name`** - Create new repository
 - **`archive repo`** - Archive repository
 
+### 🌐 Website Commands
+- **`check the game website`** - Open the live GitHub Pages website in default browser
+- **`open game site`** - Open the live GitHub Pages website in default browser
+- **`view live demo`** - Open the live GitHub Pages website in default browser
+
 ## 🎯 COMMAND PATTERNS
 
 ### Issue Workflow Pattern

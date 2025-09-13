@@ -118,6 +118,7 @@ This project uses a modular rules system for better organization and maintainabi
 - `create pr [with merge]` - Create pull request
 - `merge pr X` - Merge pull request
 - `monitor actions` - Monitor GitHub Actions
+- `check the game website` - Open live GitHub Pages website in default browser
 
 ### Development Commands
 - `generate component name` - Generate new component
