@@ -252,6 +252,39 @@ collect_failed_logs() {
     return 1  # Indicate failures found
 }
 
+# Function to show countdown timer
+countdown_timer() {
+    local seconds=$1
+    local countdown=$seconds
+    
+    # Clear the line and show initial countdown
+    printf "\r${YELLOW}🔄 Next check in %2d seconds...${NC}" $countdown
+    
+    while [ $countdown -gt 0 ]; do
+        sleep 1
+        countdown=$((countdown - 1))
+        
+        # Show progress bar for longer waits
+        if [ $seconds -ge 10 ]; then
+            local progress=$(( (seconds - countdown) * 50 / seconds ))
+            local bar=""
+            for ((i=0; i<50; i++)); do
+                if [ $i -lt $progress ]; then
+                    bar="${bar}█"
+                else
+                    bar="${bar}░"
+                fi
+            done
+            printf "\r${YELLOW}🔄 Next check in %2d seconds... [%s]${NC}" $countdown "$bar"
+        else
+            printf "\r${YELLOW}🔄 Next check in %2d seconds...${NC}" $countdown
+        fi
+    done
+    
+    # Clear the line and show completion
+    printf "\r${GREEN}✅ Check complete! Starting next check...${NC}\n"
+}
+
 # Function to wait for workflows to complete
 wait_for_completion() {
     local commit=$1
@@ -324,9 +357,9 @@ wait_for_completion() {
         local remaining_sec=$((remaining % 60))
         
         log "INFO" "⏳ Still waiting for workflows to complete... (${remaining_min}m ${remaining_sec}s remaining)"
-        log "INFO" "🔄 Next check in $CHECK_INTERVAL seconds..."
         
-        sleep $CHECK_INTERVAL
+        # Countdown timer for next check
+        countdown_timer $CHECK_INTERVAL
         elapsed=$((elapsed + CHECK_INTERVAL))
     done
     
