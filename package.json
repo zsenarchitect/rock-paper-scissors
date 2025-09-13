@@ -1,0 +1,27 @@
+{
+  "name": "rock-paper-scissors-battle-royale",
+  "version": "1.0.0",
+  "description": "AI Training Platform & Crowd Engagement Game",
+  "main": "docs/index.html",
+  "scripts": {
+    "test": "echo \"No frontend tests configured yet\"",
+    "lint": "echo \"No linting configured yet\"",
+    "format": "echo \"No formatting configured yet\""
+  },
+  "keywords": [
+    "rock-paper-scissors",
+    "battle-royale",
+    "ai-training",
+    "simulation",
+    "game"
+  ],
+  "author": "Sen Zhang",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
