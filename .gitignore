@@ -116,9 +116,14 @@ DEBUG/
 *.tmp
 *.temp
 debug_*
-test_*
 *_test
 *.debug
 *.log
 *.trace
 *.dump
+
+# Test files (but allow CI test scripts)
+!test_frontend.py
+!test_backend.py
+!test_ai_training.py
+!test_performance.py
