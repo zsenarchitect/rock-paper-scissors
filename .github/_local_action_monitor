@@ -325,9 +325,6 @@ countdown_timer() {
     local seconds=$1
     local countdown=$seconds
     
-    # Clear the line and show initial countdown
-    printf "\r${YELLOW}🔄 Next check in %2d seconds... (Press Ctrl+C to interrupt)${NC}" $countdown
-    
     while [ $countdown -gt 0 ]; do
         # Use a shorter sleep to make it more responsive to interrupts
         sleep 1
