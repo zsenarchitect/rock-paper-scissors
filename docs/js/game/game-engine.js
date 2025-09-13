@@ -206,21 +206,26 @@ class GameEngine {
         
         const currentTime = performance.now();
         this.deltaTime = currentTime - this.lastTime;
-        this.lastTime = currentTime;
         
-        // Update performance metrics
-        this.updatePerformanceMetrics();
-        
-        if (!this.isPaused) {
-            // Update game state
-            this.update(this.deltaTime);
+        // Frame rate limiting - only update at target FPS
+        const targetFrameTime = 1000 / GameConfig.game.fps;
+        if (this.deltaTime >= targetFrameTime) {
+            this.lastTime = currentTime;
             
-            // Render game
-            this.render();
+            // Update performance metrics
+            this.updatePerformanceMetrics();
+            
+            if (!this.isPaused) {
+                // Update game state
+                this.update(this.deltaTime);
+                
+                // Render game
+                this.render();
+            }
+            
+            // Check if battle should end
+            this.checkBattleEnd();
         }
-        
-        // Check if battle should end
-        this.checkBattleEnd();
         
         // Continue game loop
         requestAnimationFrame(() => this.gameLoop());
@@ -257,21 +262,18 @@ class GameEngine {
         }
     }
 
-    // Check collisions between entities
+    // Check collisions between entities using spatial partitioning
     checkCollisions() {
         if (!this.collisionSystem) return;
         
         const entities = Array.from(this.entities.values()).filter(e => e.isAlive);
         
-        for (let i = 0; i < entities.length; i++) {
-            for (let j = i + 1; j < entities.length; j++) {
-                const entity1 = entities[i];
-                const entity2 = entities[j];
-                
-                if (this.collisionSystem.checkCollision(entity1, entity2)) {
-                    this.handleCollision(entity1, entity2);
-                }
-            }
+        // Use spatial partitioning for collision detection
+        const collisionPairs = this.collisionSystem.checkAllCollisions(entities);
+        
+        // Handle each collision pair
+        for (const pair of collisionPairs) {
+            this.handleCollision(pair.entity1, pair.entity2);
         }
     }
 
@@ -389,22 +391,24 @@ class GameEngine {
         this.ctx.fillStyle = '#f0f0f0';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw grid
-        this.ctx.strokeStyle = '#e0e0e0';
-        this.ctx.lineWidth = 1;
-        
-        for (let x = 0; x < this.canvas.width; x += 50) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(x, 0);
-            this.ctx.lineTo(x, this.canvas.height);
-            this.ctx.stroke();
-        }
-        
-        for (let y = 0; y < this.canvas.height; y += 50) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, y);
-            this.ctx.lineTo(this.canvas.width, y);
-            this.ctx.stroke();
+        // Only draw grid if enabled in config
+        if (GameConfig.visual.drawGrid) {
+            this.ctx.strokeStyle = '#e0e0e0';
+            this.ctx.lineWidth = 1;
+            
+            for (let x = 0; x < this.canvas.width; x += 50) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, 0);
+                this.ctx.lineTo(x, this.canvas.height);
+                this.ctx.stroke();
+            }
+            
+            for (let y = 0; y < this.canvas.height; y += 50) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, y);
+                this.ctx.lineTo(this.canvas.width, y);
+                this.ctx.stroke();
+            }
         }
     }
 

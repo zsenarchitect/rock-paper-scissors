@@ -2,8 +2,10 @@
 class CollisionSystem {
     constructor() {
         this.spatialGrid = new Map();
-        this.gridSize = 50;
+        this.gridSize = 100; // Increased grid size for better performance
         this.collisionPairs = [];
+        this.lastGridUpdate = 0;
+        this.GRID_UPDATE_INTERVAL = 50; // Update grid every 50ms instead of every frame
         
         logger.info('Collision system initialized');
     }
@@ -42,8 +44,13 @@ class CollisionSystem {
         return distance <= avoidanceRadius;
     }
 
-    // Update spatial grid
+    // Update spatial grid with throttling
     updateSpatialGrid(entities) {
+        const now = Date.now();
+        if (now - this.lastGridUpdate < this.GRID_UPDATE_INTERVAL) {
+            return; // Skip update if too soon
+        }
+        
         this.spatialGrid.clear();
         
         for (const entity of entities) {
@@ -59,6 +66,8 @@ class CollisionSystem {
             
             this.spatialGrid.get(key).push(entity);
         }
+        
+        this.lastGridUpdate = now;
     }
 
     // Get entities in same grid cell
