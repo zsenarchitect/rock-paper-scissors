@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test - Rock Paper Scissors</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        #output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Debug Test - Rock Paper Scissors Battle Royale</h1>
+    <div id="output"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = new Date().toISOString() + ' - ' + message;
+            output.appendChild(div);
+            console.log(message);
+        }
+
+        // Test loading each script file
+        function testScriptLoad(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    log('✅ Loaded: ' + src, 'success');
+                    resolve();
+                };
+                script.onerror = (error) => {
+                    log('❌ Failed to load: ' + src + ' - ' + error, 'error');
+                    reject(error);
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Test all required scripts
+        async function testAllScripts() {
+            const scripts = [
+                'js/config/game-config.js',
+                'js/utils/logger.js',
+                'js/utils/storage.js',
+                'js/utils/math-utils.js',
+                'js/utils/audio-manager.js',
+                'js/game/game-engine.js',
+                'js/entities/base-entity.js',
+                'js/entities/rock-entity.js',
+                'js/entities/paper-entity.js',
+                'js/entities/scissors-entity.js',
+                'js/game/entity-manager.js',
+                'js/game/collision-system.js',
+                'js/game/physics-engine.js',
+                'js/visualization/live-charts.js',
+                'js/visualization/pie-chart.js',
+                'js/visualization/trend-graph.js',
+                'js/voting/voting-system.js',
+                'js/rooms/room-manager.js',
+                'js/api/battle-api.js',
+                'js/cute-cursor.js',
+                'js/app.js'
+            ];
+
+            log('Starting script loading test...', 'info');
+            
+            for (const script of scripts) {
+                try {
+                    await testScriptLoad(script);
+                } catch (error) {
+                    log('Script loading failed: ' + script, 'error');
+                }
+            }
+            
+            log('Script loading test completed', 'info');
+            
+            // Test if global objects are available
+            setTimeout(() => {
+                testGlobalObjects();
+            }, 1000);
+        }
+
+        function testGlobalObjects() {
+            log('Testing global objects...', 'info');
+            
+            const objects = [
+                'GameConfig',
+                'logger',
+                'storage',
+                'GameEngine',
+                'BaseEntity',
+                'RockEntity',
+                'PaperEntity',
+                'ScissorsEntity',
+                'EntityManager',
+                'CollisionSystem',
+                'PhysicsEngine',
+                'LiveCharts',
+                'PieChart',
+                'TrendChart',
+                'VotingSystem',
+                'RoomManager',
+                'BattleAPI',
+                'App'
+            ];
+            
+            objects.forEach(obj => {
+                if (typeof window[obj] !== 'undefined') {
+                    log('✅ Global object available: ' + obj, 'success');
+                } else {
+                    log('❌ Global object missing: ' + obj, 'error');
+                }
+            });
+        }
+
+        // Start test when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Debug test page loaded', 'info');
+            testAllScripts();
+        });
+
+        // Catch any unhandled errors
+        window.addEventListener('error', (event) => {
+            log('❌ Unhandled error: ' + event.message + ' at ' + event.filename + ':' + event.lineno, 'error');
+        });
+    </script>
+</body>
+</html>

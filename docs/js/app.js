@@ -186,7 +186,9 @@ class App {
     // Start UI update loop with throttling
     startUIUpdateLoop() {
         let lastUIUpdate = 0;
+        let lastLogSend = 0;
         const UI_UPDATE_INTERVAL = 100; // Update UI every 100ms instead of every frame
+        const LOG_SEND_INTERVAL = 30000; // Send logs every 30 seconds
         
         const updateUI = () => {
             if (this.gameEngine && this.gameEngine.isRunning) {
@@ -195,6 +197,13 @@ class App {
                     this.updateUI();
                     lastUIUpdate = now;
                 }
+                
+                // Send logs to backend periodically
+                if (now - lastLogSend >= LOG_SEND_INTERVAL) {
+                    this.sendLogsToBackend();
+                    lastLogSend = now;
+                }
+                
                 requestAnimationFrame(updateUI);
             }
         };
@@ -502,8 +511,24 @@ class App {
         storage.savePreferences(preferences);
     }
 
+    // Send logs to backend
+    async sendLogsToBackend() {
+        if (typeof logger !== 'undefined' && logger.sendLogsToBackend) {
+            try {
+                await logger.sendLogsToBackend();
+            } catch (error) {
+                console.error('Failed to send logs to backend:', error);
+            }
+        }
+    }
+
     // Show error message
     showError(message) {
+        // Log error to our enhanced logger
+        if (typeof logger !== 'undefined') {
+            logger.error('Application Error', { message });
+        }
+        
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
         errorDiv.textContent = message;

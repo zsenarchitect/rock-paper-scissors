@@ -1,17 +1,60 @@
 #!/usr/bin/env node
 
-// Simple HTTP Server for Rock Paper Scissors Battle Royale
-// Serves the docs directory with proper MIME types and CORS headers
+// Enhanced HTTP Server for Rock Paper Scissors Battle Royale
+// Serves the docs directory with proper MIME types, CORS headers, and debug logging
 
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+const url = require('url');
 
 // Configuration
 const PORT = process.env.PORT || 3000;
 const HOST = 'localhost';
 const DOCS_DIR = path.join(__dirname, '..', 'docs');
+const DEBUG_DIR = path.join(__dirname, '..', 'DEBUG', 'logs');
+
+// Ensure DEBUG directory exists
+if (!fs.existsSync(DEBUG_DIR)) {
+    fs.mkdirSync(DEBUG_DIR, { recursive: true });
+}
+
+// Debug logging
+const debugLog = (message, data = null) => {
+    const timestamp = new Date().toISOString();
+    const logEntry = {
+        timestamp,
+        message,
+        data,
+        type: 'backend'
+    };
+    
+    console.log(`[${timestamp}] DEBUG: ${message}`, data || '');
+    
+    // Write to debug log file
+    const logFile = path.join(DEBUG_DIR, `server-debug_${new Date().toISOString().split('T')[0]}.log`);
+    const logLine = `${timestamp} - ${message}${data ? ' - ' + JSON.stringify(data) : ''}\n`;
+    fs.appendFileSync(logFile, logLine);
+};
+
+// Error logging
+const errorLog = (message, error = null) => {
+    const timestamp = new Date().toISOString();
+    const logEntry = {
+        timestamp,
+        message,
+        error: error ? error.stack || error.toString() : null,
+        type: 'backend_error'
+    };
+    
+    console.error(`[${timestamp}] ERROR: ${message}`, error || '');
+    
+    // Write to error log file
+    const logFile = path.join(DEBUG_DIR, `server-error_${new Date().toISOString().split('T')[0]}.log`);
+    const logLine = `${timestamp} - ${message}${error ? ' - ' + (error.stack || error.toString()) : ''}\n`;
+    fs.appendFileSync(logFile, logLine);
+};
 
 // MIME types
 const mimeTypes = {
@@ -69,18 +112,30 @@ function serveFile(req, res, filePath) {
 }
 
 function handleRequest(req, res) {
-    let filePath = req.url;
+    const parsedUrl = url.parse(req.url, true);
+    const pathname = parsedUrl.pathname;
+    
+    debugLog(`Request received: ${req.method} ${pathname}`, {
+        headers: req.headers,
+        query: parsedUrl.query
+    });
+    
+    // Handle API endpoints
+    if (pathname.startsWith('/api/')) {
+        handleAPIRequest(req, res, pathname);
+        return;
+    }
+    
+    let filePath = pathname;
     
     // Default to index.html for root path
     if (filePath === '/') {
         filePath = '/index.html';
     }
     
-    // Remove query parameters
-    filePath = filePath.split('?')[0];
-    
     // Security: prevent directory traversal
     if (filePath.includes('..')) {
+        errorLog('Directory traversal attempt blocked', { path: filePath, ip: req.connection.remoteAddress });
         res.writeHead(403, { 'Content-Type': 'text/plain' });
         res.end('Forbidden');
         return;
@@ -91,10 +146,12 @@ function handleRequest(req, res) {
     // Check if file exists
     fs.access(fullPath, fs.constants.F_OK, (err) => {
         if (err) {
+            debugLog(`File not found: ${filePath}`, { error: err.message });
             // Try serving index.html for SPA routing
             const indexPath = path.join(DOCS_DIR, 'index.html');
             fs.access(indexPath, fs.constants.F_OK, (err2) => {
                 if (err2) {
+                    errorLog('Index.html not found', { error: err2.message });
                     res.writeHead(404, { 'Content-Type': 'text/plain' });
                     res.end('File not found');
                 } else {
@@ -105,6 +162,87 @@ function handleRequest(req, res) {
             serveFile(req, res, fullPath);
         }
     });
+}
+
+// Handle API requests
+function handleAPIRequest(req, res, pathname) {
+    const method = req.method;
+    
+    if (pathname === '/api/logs' && method === 'POST') {
+        handleLogSubmission(req, res);
+    } else if (pathname === '/api/status' && method === 'GET') {
+        handleStatusRequest(req, res);
+    } else if (pathname === '/api/debug' && method === 'GET') {
+        handleDebugRequest(req, res);
+    } else {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'API endpoint not found' }));
+    }
+}
+
+// Handle log submission from frontend
+function handleLogSubmission(req, res) {
+    let body = '';
+    
+    req.on('data', chunk => {
+        body += chunk.toString();
+    });
+    
+    req.on('end', () => {
+        try {
+            const logData = JSON.parse(body);
+            debugLog('Frontend logs received', logData);
+            
+            // Write frontend logs to file
+            const logFile = path.join(DEBUG_DIR, `frontend-logs_${new Date().toISOString().split('T')[0]}.log`);
+            const logLine = `${new Date().toISOString()} - Frontend Logs\n${JSON.stringify(logData, null, 2)}\n\n`;
+            fs.appendFileSync(logFile, logLine);
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, message: 'Logs received' }));
+        } catch (error) {
+            errorLog('Failed to parse frontend logs', error);
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid log data' }));
+        }
+    });
+}
+
+// Handle status request
+function handleStatusRequest(req, res) {
+    const status = {
+        server: 'running',
+        port: PORT,
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        timestamp: new Date().toISOString()
+    };
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(status));
+}
+
+// Handle debug request
+function handleDebugRequest(req, res) {
+    try {
+        const debugFiles = fs.readdirSync(DEBUG_DIR);
+        const logs = debugFiles.map(file => {
+            const filePath = path.join(DEBUG_DIR, file);
+            const stats = fs.statSync(filePath);
+            return {
+                name: file,
+                size: stats.size,
+                modified: stats.mtime
+            };
+        });
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ logs }));
+    } catch (error) {
+        errorLog('Failed to read debug files', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Failed to read debug files' }));
+    }
 }
 
 // Create server

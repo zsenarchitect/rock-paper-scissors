@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors Battle Royale - Working Version</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/pixel-sprites.css">
+    <link rel="stylesheet" href="css/cute-cursor.css">
+    <style>
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debugInfo">
+        <div>Status: Loading...</div>
+        <div>Errors: <span id="errorCount">0</span></div>
+        <div>Warnings: <span id="warningCount">0</span></div>
+    </div>
+
+    <div id="app">
+        <!-- Header -->
+        <header class="header pixel-decoration">
+            <h1>🎮 ROCK PAPER SCISSORS BATTLE ROYALE</h1>
+            <p>WATCH THE ULTIMATE BATTLE UNFOLD! VOTE TO SUPPORT YOUR TEAM!</p>
+        </header>
+
+        <!-- Game Canvas -->
+        <div class="game-container">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="game-overlay">
+                <div class="team-counts">
+                    <div class="team-count" id="team1-count">
+                        <span class="team-name">
+                            <span class="team-indicator team-1"></span>TEAM 1
+                        </span>
+                        <span class="count">40</span>
+                    </div>
+                    <div class="team-count" id="team2-count">
+                        <span class="team-name">
+                            <span class="team-indicator team-2"></span>TEAM 2
+                        </span>
+                        <span class="count">40</span>
+                    </div>
+                    <div class="team-count" id="team3-count">
+                        <span class="team-name">
+                            <span class="team-indicator team-3"></span>TEAM 3
+                        </span>
+                        <span class="count">40</span>
+                    </div>
+                </div>
+                <div class="voting-panel">
+                    <h3>SUPPORT YOUR TEAM!</h3>
+                    <div class="vote-buttons">
+                        <button class="vote-btn" data-team="1">
+                            <span class="rock-sprite"></span> ADD SOLDIER TO TEAM 1
+                        </button>
+                        <button class="vote-btn" data-team="2">
+                            <span class="paper-sprite"></span> ADD SOLDIER TO TEAM 2
+                        </button>
+                        <button class="vote-btn" data-team="3">
+                            <span class="scissors-sprite"></span> ADD SOLDIER TO TEAM 3
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Battle Info -->
+        <div class="battle-info">
+            <div class="battle-stats pixel-decoration">
+                <div class="stat">
+                    <span class="label">BATTLE TIME:</span>
+                    <span class="value" id="battle-time">00:00</span>
+                </div>
+                <div class="stat">
+                    <span class="label">TOTAL CONVERSIONS:</span>
+                    <span class="value" id="total-conversions">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">ACTIVE PLAYERS:</span>
+                    <span class="value" id="active-players">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config/game-config.js"></script>
+    <script src="js/utils/logger.js"></script>
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/math-utils.js"></script>
+    <script src="js/utils/audio-manager.js"></script>
+    <script src="js/game/game-engine.js"></script>
+    <script src="js/entities/base-entity.js"></script>
+    <script src="js/entities/rock-entity.js"></script>
+    <script src="js/entities/paper-entity.js"></script>
+    <script src="js/entities/scissors-entity.js"></script>
+    <script src="js/game/entity-manager.js"></script>
+    <script src="js/game/collision-system.js"></script>
+    <script src="js/game/physics-engine.js"></script>
+    <script src="js/visualization/live-charts.js"></script>
+    <script src="js/visualization/pie-chart.js"></script>
+    <script src="js/visualization/trend-graph.js"></script>
+    <script src="js/voting/voting-system.js"></script>
+    <script src="js/rooms/room-manager.js"></script>
+    <script src="js/api/battle-api.js"></script>
+    <script src="js/cute-cursor.js"></script>
+    <script src="js/app.js"></script>
+
+    <script>
+        // Enhanced error tracking
+        let errorCount = 0;
+        let warningCount = 0;
+
+        function updateDebugInfo() {
+            document.getElementById('errorCount').textContent = errorCount;
+            document.getElementById('warningCount').textContent = warningCount;
+        }
+
+        function logError(message, error) {
+            errorCount++;
+            updateDebugInfo();
+            console.error('GAME ERROR:', message, error);
+        }
+
+        function logWarning(message) {
+            warningCount++;
+            updateDebugInfo();
+            console.warn('GAME WARNING:', message);
+        }
+
+        // Enhanced error handling
+        window.addEventListener('error', (event) => {
+            logError('Unhandled JavaScript Error', {
+                message: event.message,
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                error: event.error
+            });
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            logError('Unhandled Promise Rejection', event.reason);
+        });
+
+        // Test game initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, testing game initialization...');
+            
+            try {
+                // Check if all required objects are available
+                const requiredObjects = [
+                    'GameConfig', 'logger', 'storage', 'GameEngine', 
+                    'BaseEntity', 'App'
+                ];
+                
+                const missingObjects = requiredObjects.filter(obj => typeof window[obj] === 'undefined');
+                
+                if (missingObjects.length > 0) {
+                    logError('Missing required objects: ' + missingObjects.join(', '));
+                    return;
+                }
+                
+                console.log('All required objects available');
+                
+                // Try to initialize the app
+                const app = new App();
+                console.log('App instance created');
+                
+                app.initialize().then(() => {
+                    console.log('App initialized successfully');
+                    document.querySelector('.debug-info').innerHTML = 
+                        '<div>Status: ✅ Running</div>' +
+                        '<div>Errors: <span id="errorCount">' + errorCount + '</span></div>' +
+                        '<div>Warnings: <span id="warningCount">' + warningCount + '</span></div>';
+                }).catch(error => {
+                    logError('App initialization failed', error);
+                });
+                
+            } catch (error) {
+                logError('Game initialization failed', error);
+            }
+        });
+    </script>
+</body>
+</html>

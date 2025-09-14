@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Error Test</title>
+    <script src="js/config/game-config.js"></script>
+    <script src="js/utils/logger.js"></script>
+</head>
+<body>
+    <h1>Frontend Error Testing</h1>
+    <button onclick="testErrors()">Test Frontend Errors</button>
+    <button onclick="testWarnings()">Test Warnings</button>
+    <button onclick="testDebug()">Test Debug Messages</button>
+    <button onclick="sendLogs()">Send Logs to Backend</button>
+    
+    <div id="output"></div>
+
+    <script>
+        function testErrors() {
+            logger.error('Test error message', { 
+                test: true, 
+                timestamp: Date.now(),
+                details: 'This is a test error for debugging purposes'
+            });
+            
+            // Trigger a JavaScript error
+            try {
+                throw new Error('Intentional test error');
+            } catch (e) {
+                logger.error('Caught test error', e);
+            }
+            
+            updateOutput('Errors logged - check console and backend logs');
+        }
+
+        function testWarnings() {
+            logger.warn('Test warning message', { 
+                test: true, 
+                timestamp: Date.now(),
+                details: 'This is a test warning for debugging purposes'
+            });
+            
+            updateOutput('Warnings logged - check console and backend logs');
+        }
+
+        function testDebug() {
+            logger.debug('Test debug message', { 
+                test: true, 
+                timestamp: Date.now(),
+                details: 'This is a test debug message for debugging purposes'
+            });
+            
+            updateOutput('Debug messages logged - check console and backend logs');
+        }
+
+        async function sendLogs() {
+            try {
+                await logger.sendLogsToBackend();
+                updateOutput('Logs sent to backend successfully');
+            } catch (error) {
+                updateOutput('Failed to send logs: ' + error.message);
+            }
+        }
+
+        function updateOutput(message) {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.textContent = new Date().toISOString() + ' - ' + message;
+            div.style.margin = '5px 0';
+            div.style.padding = '5px';
+            div.style.border = '1px solid #ccc';
+            output.appendChild(div);
+        }
+
+        // Initialize logger
+        document.addEventListener('DOMContentLoaded', () => {
+            updateOutput('Frontend error test page loaded');
+            logger.info('Frontend error test page initialized');
+        });
+    </script>
+</body>
+</html>
