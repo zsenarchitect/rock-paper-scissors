@@ -4,6 +4,7 @@ class App {
         this.gameEngine = null;
         this.votingSystem = null;
         this.roomManager = null;
+        this.commentarySystem = null;
         this.currentRoom = 'restaurant';
         this.isInitialized = false;
         
@@ -42,6 +43,9 @@ class App {
             if (!this.gameEngine.initialize()) {
                 throw new Error('Failed to initialize game engine');
             }
+            
+            // Initialize commentary system
+            this.commentarySystem = new CommentarySystem(this.gameEngine);
             
             // Setup game engine callbacks
             this.setupGameEngineCallbacks();
@@ -145,6 +149,30 @@ class App {
         window.addEventListener('resize', () => {
             this.handleResize();
         });
+        
+        // Commentary controls
+        const toggleCommentaryBtn = document.getElementById('toggle-commentary');
+        if (toggleCommentaryBtn) {
+            toggleCommentaryBtn.addEventListener('click', () => {
+                this.toggleCommentary();
+                this.updateCommentaryStatus();
+            });
+        }
+        
+        const commentaryStatsBtn = document.getElementById('commentary-stats');
+        if (commentaryStatsBtn) {
+            commentaryStatsBtn.addEventListener('click', () => {
+                this.showCommentaryStats();
+            });
+        }
+        
+        const clearCommentaryBtn = document.getElementById('clear-commentary');
+        if (clearCommentaryBtn) {
+            clearCommentaryBtn.addEventListener('click', () => {
+                this.clearCommentaryQueue();
+                this.updateCommentaryStatus();
+            });
+        }
     }
 
     // Start the game
@@ -520,6 +548,70 @@ class App {
                 console.error('Failed to send logs to backend:', error);
             }
         }
+    }
+
+    // Commentary system control methods
+    toggleCommentary() {
+        if (this.commentarySystem) {
+            if (this.commentarySystem.isEnabled) {
+                this.commentarySystem.disable();
+                logger.info('Commentary system disabled');
+            } else {
+                this.commentarySystem.enable();
+                logger.info('Commentary system enabled');
+            }
+        }
+    }
+
+    setCommentaryCooldown(milliseconds) {
+        if (this.commentarySystem) {
+            this.commentarySystem.setCooldown(milliseconds);
+        }
+    }
+
+    getCommentaryStatistics() {
+        if (this.commentarySystem) {
+            return this.commentarySystem.getStatistics();
+        }
+        return null;
+    }
+
+    clearCommentaryQueue() {
+        if (this.commentarySystem) {
+            this.commentarySystem.clearQueue();
+        }
+    }
+
+    updateCommentaryStatus() {
+        const statusElement = document.getElementById('commentary-status');
+        if (statusElement && this.commentarySystem) {
+            const stats = this.commentarySystem.getStatistics();
+            const status = this.commentarySystem.isEnabled ? 'Enabled' : 'Disabled';
+            const queueInfo = stats.queueLength > 0 ? ` (${stats.queueLength} queued)` : '';
+            statusElement.textContent = `Status: ${status}${queueInfo}`;
+        }
+    }
+
+    showCommentaryStats() {
+        if (!this.commentarySystem) return;
+        
+        const stats = this.commentarySystem.getStatistics();
+        const voiceStats = this.commentarySystem.voiceSynthesis?.getStatistics() || {};
+        
+        const statsMessage = `
+Commentary Statistics:
+• Total Commentaries: ${stats.totalCommentaries}
+• OpenAI Generated: ${stats.openAIGenerated}
+• Fallback Used: ${stats.fallbackUsed}
+• Voice Synthesized: ${stats.voiceSynthesized}
+• Queue Length: ${stats.queueLength}
+• Battle Intensity: ${(stats.battleIntensity * 100).toFixed(1)}%
+• Voice Support: ${voiceStats.isSupported ? 'Yes' : 'No'}
+• Voice Speaking: ${voiceStats.isSpeaking ? 'Yes' : 'No'}
+        `.trim();
+        
+        alert(statsMessage);
+        logger.info('Commentary statistics displayed', stats);
     }
 
     // Show error message

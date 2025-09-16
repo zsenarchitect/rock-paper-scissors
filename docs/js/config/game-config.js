@@ -52,6 +52,18 @@ const GameConfig = {
         fitnessThreshold: 0.8
     },
 
+    // OpenAI Commentary Settings
+    openai: {
+        enabled: true,
+        model: 'gpt-3.5-turbo',
+        maxTokens: 150,
+        temperature: 0.8,
+        rateLimitDelay: 1000, // 1 second between requests
+        fallbackEnabled: true,
+        voiceSynthesis: true,
+        commentaryCooldown: 3000 // 3 seconds between commentaries
+    },
+
     // Room Settings
     rooms: {
         default: 'restaurant',
