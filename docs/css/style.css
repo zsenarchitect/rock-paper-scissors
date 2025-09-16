@@ -740,3 +740,112 @@ body::before {
 .debug-overlay .debug-value {
     color: #FFC107;
 }
+
+/* Commentary Controls */
+.commentary-controls {
+    background: linear-gradient(45deg, #0f3460, #16213e);
+    border: 4px solid #e94560;
+    border-radius: 0;
+    margin: 1rem;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 
+        0 0 0 2px #0f3460,
+        0 0 0 4px #e94560,
+        0 8px 0 0 #0f3460;
+}
+
+.commentary-controls h3 {
+    color: #e94560;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-shadow: 2px 2px 0 #0f3460;
+}
+
+.commentary-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.commentary-btn {
+    background: linear-gradient(45deg, #e94560, #ff6b6b);
+    border: 3px solid #0f3460;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    box-shadow: 
+        0 0 0 1px #0f3460,
+        0 4px 0 0 #0f3460;
+}
+
+.commentary-btn:hover {
+    background: linear-gradient(45deg, #ff6b6b, #e94560);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 0 0 1px #0f3460,
+        0 6px 0 0 #0f3460;
+}
+
+.commentary-btn:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 0 0 1px #0f3460,
+        0 2px 0 0 #0f3460;
+}
+
+.commentary-status {
+    color: #4CAF50;
+    font-size: 0.7rem;
+    text-shadow: 1px 1px 0 #0f3460;
+}
+
+/* Commentary Display */
+.commentary-display {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 25px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1000;
+    max-width: 80%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border: 3px solid #e94560;
+    text-shadow: 2px 2px 0 #0f3460;
+    animation: commentarySlideIn 0.5s ease-out;
+}
+
+@keyframes commentarySlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes commentarySlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+}
